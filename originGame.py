@@ -337,79 +337,133 @@ def moon_lander_play_draw(status):
 def moon_lander_update():
     pass
 #####　SHOOTING SURVIVAL(DRAW)　###################################################################
-def shooting_survival_draw():
+def shooting_survival_draw(status):
+    #SHOOTING SURVIVAL　オープニング
+    if status ==20:
+        shooting_survival_draw_stage()
+        screen.draw.text('SHOOTING SURVIVAL',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
+        game_start_guide()
+        
     #ゲーム画面
-    if status ==21:
+    elif status ==21:
+        #ステージの描写
+        shooting_survival_draw_stage()
+        #HP の描写
+        shooting_survival_draw_hp()
+        #ミサイルの描写
+        shooting_survival_draw_missiles()
         
-        for y in range(15):
-            for x in range(20):
-                if map_data[y][x] !=0:
-                    box2.topleft=(40*x,40*y)
-                    box2.draw()
-        shooting_survival_missiles = [p_missiles1,
-                                      p_missiles2,
-                                      p_missiles3,
-                                      p_missiles4,
-                                      e_missiles1,
-                                      e_missiles2,
-                                      e_missiles3,
-                                      e_missiles4]
-        for missiles_list in shooting_survival_missiles:
-            for missile in missiles_list:
-                missile.draw()
-        
-        player.draw()
-        enemy.draw()
         #終わりのガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            if guide =="menu":
-                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+        game_end_guide()
 
-        #HPの描写
-        for text,pos in shooting_survival_hp:
-            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
-
-
-
-    #Player1 勝利時
-    elif status ==22:
-        for y in range(15):
-            for x in range(20):
-                if map_data[y][x] !=0:
-                    box2.topleft=(40*x,40*y)
-                    box2.draw()
+    #結果
+    elif status == 22 or status == 23:
+        shooting_survival_winner_draw(status)
+        game_over_guide()
         
-        player.draw()
-        screen.draw.text('PLAYER 1 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-        
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+def shooting_survival_draw_stage():
+    for y in range(15):
+        for x in range(20):
+            if map_data[y][x] !=0:
+                box2.topleft=(40*x,40*y)
+                box2.draw()
+    player.draw()
+    enemy.draw()
 
+def shooting_survival_winner_draw(status):
+    shooting_survival_draw_stage()
+    win_player = status - 21 #Player1が勝ったら1,Player2が勝ったら2
+    screen.draw.text(f'PLAYER {win_player} WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
 
+    game_over_guide()
 
-    #Player2 勝利時
-    elif status ==23:
-        for y in range(15):
-            for x in range(20):
-                if map_data[y][x] !=0:
-                    box2.topleft=(40*x,40*y)
-                    box2.draw()
-        
-        enemy.draw()
-        screen.draw.text('PLAYER 2 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+def shooting_survival_draw_hp():
+    #SHOOTING SURVIVAL HP
+    shooting_survival_hp = [(f'Player1 HP = {player_hp}',(100,15)),
+                            (f'Player2 HP = {enemy_hp}' ,(500,15))]
+    #HPの描写
+    for text,pos in shooting_survival_hp:
+        screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+
+def shooting_survival_draw_missiles():
+    shooting_survival_missiles = [p_missiles1,
+                                  p_missiles2,
+                                  p_missiles3,
+                                  p_missiles4,
+                                  e_missiles1,
+                                  e_missiles2,
+                                  e_missiles3,
+                                  e_missiles4]
+    for missiles_list in shooting_survival_missiles:
+        for missile in missiles_list:
+            missile.draw()
+    
+    
+    
+    
 #####　SHOORING SURVIVAL(UPDATE)　#################################################################
 def shooting_survival_update():
     pass
 #####　AIR HOCEKY(DRAW)　##########################################################################
-def air_hockey_draw():
-    pass
+def air_hockey_draw(status):
+    air_hockey_draw_stage()
+
+    #AIR HOCEKY オープニング
+    if status==26:
+        screen.draw.text('AIR HOCKEY',(230,200),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
+        game_start_guide()
+
+    #ゲーム画面
+    elif status == 27:
+        air_hockey_draw_point()
+        
+
+    elif status == 28 or status == 29:
+        air_hockey_goal_draw(status)
+        game_middle_guide()
+        
+    elif status == 30 or status == 31:
+        air_hockey_Winner_draw(status)
+        game_end_guide()
+        
+def air_hockey_draw_stage():
+    for y in range(15):
+        for x in range(20):
+            floor.topleft=(40*x,40*y)
+            floor.draw()
+            if hock_data[y][x] ==1:
+                box.topleft=(40*x,40*y)
+                box.draw()
+    for y in range(3):
+        for x in range(20):
+            if goal_data[y][x] ==3:
+                goal.topleft=(40*x,200*(y-1))
+                goal.draw()
+    boal.draw()
+    pack1.draw()
+    pack2.draw()
+
+def air_hockey_goal_draw(status):
+    get_goal_player = status % 2  #Player1なら0,Player2なら1
+    gcolor = ['RED','YELLOW']
+    screen.draw.text('GOAL!', (160,200), color = 'WHITE', gcolor = gcolor[get_goal_player], fontsize=72)
+    
+def air_hockey_Winner_draw(status):
+    get_goal_player = status % 2  #Player1なら0,Player2なら1
+    gcolor = ['RED','YELLOW']
+    screen.draw.text(f'Player {get_goal_player + 1} win',(160,200),color = 'WHITE',gcolor = gcolor[get_goal_player],fontsize=72)
+    
+
+def air_hockey_draw_point():
+    #AIR HOCKEY POINTの描写
+    air_hockey_point = [(f'A point = {apoint}', (50 ,50)),
+                        (f'B point = {bpoint}', (600,50))]
+    #Pointの描写
+    for text,pos in air_hockey_point:
+        screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+    
+    
+    
 #####　AIR HOCKEY(UPDATE)　########################################################################
 def air_hockey_update():
     pass
@@ -424,15 +478,6 @@ def no_touch_game_update():
 #絵の描画
 def draw():
     global status,eship,enemy,player,player_hp,enemy_hp,apoint,bpoint
-
-    #SHOOTING SURVIVAL HPの描写
-    shooting_survival_hp = [(f'Player1 HP = {player_hp}',(100,15)),
-                            (f'Player2 HP = {enemy_hp}' ,(500,15))]
-
-    #AIR HOCKEY POINTの描写
-    air_hockey_point = [(f'A point = {apoint}', (50 ,50)),
-                        (f'B point = {bpoint}', (600,50))]
-
 
     #初めのガイド
     start_guide = [("start",(550,150),"click Enter",(650,150),'RED'),
@@ -456,255 +501,32 @@ def draw():
     if status ==1:
         home()
 
+
     #選択画面
     elif status == 2:
         menu()
+
         
     #SPACE SHOOTER
     elif 3 <= status <= 9 :
         space_shooter_draw(status,eship,shooter)
         
 
-            
     #MOON LANDER　
     elif 10 <= status <= 19:
         moon_lander_draw(status)
 
+
     #SHOOTING SURVIVAL
-    elif status ==20:
-        for y in range(15):
-            for x in range(20):
-                #floor.topleft=(35*x,35*y)
-                #floor.draw()
-                if map_data[y][x] !=0:
-                    box2.topleft=(40*x,40*y)
-                    box2.draw()
-        player.draw()
-        enemy.draw()
-        screen.draw.text('SHOOTING SURVIVAL',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-        #初めのガイド
-        for guide,gpos,click,cpos,g_color in start_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-
-
-    #ゲーム画面
-    elif status ==21:
-        
-        for y in range(15):
-            for x in range(20):
-                if map_data[y][x] !=0:
-                    box2.topleft=(40*x,40*y)
-                    box2.draw()
-                    
-        shooting_survival_missiles = [p_missiles1,
-                                      p_missiles2,
-                                      p_missiles3,
-                                      p_missiles4,
-                                      e_missiles1,
-                                      e_missiles2,
-                                      e_missiles3,
-                                      e_missiles4]
-        for missiles_list in shooting_survival_missiles:
-            for missile in missiles_list:
-                missile.draw()
-        
-        player.draw()
-        enemy.draw()
-        #終わりのガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            if guide =="menu":
-                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-        #HPの描写
-        for text,pos in shooting_survival_hp:
-            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
-
-
-
-    #Player1 勝利時
-    elif status ==22:
-        for y in range(15):
-            for x in range(20):
-                if map_data[y][x] !=0:
-                    box2.topleft=(40*x,40*y)
-                    box2.draw()
-        
-        player.draw()
-        screen.draw.text('PLAYER 1 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-        
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-
-
-    #Player2 勝利時
-    elif status ==23:
-        for y in range(15):
-            for x in range(20):
-                if map_data[y][x] !=0:
-                    box2.topleft=(40*x,40*y)
-                    box2.draw()
-        
-        enemy.draw()
-        screen.draw.text('PLAYER 2 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+    elif 20 <= status <=23:
+        shooting_survival_draw(status)
         
     
 
     #AIR HOCKEY
-    elif status==26:
-        for y in range(15):
-                for x in range(20):
-                    floor.topleft=(40*x,40*y)
-                    floor.draw()
-                    if hock_data[y][x] ==1:
-                        box.topleft=(40*x,40*y)
-                        box.draw()
-        for y in range(3):
-            for x in range(20):
-                if goal_data[y][x] ==3:
-                    goal.topleft=(40*x,200*(y-1))
-                    goal.draw()
-        screen.draw.text('AIR HOCKEY',(230,200),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
+    elif 26 <= status <= 31:
+        air_hockey_draw(status)
         
-        #初めのガイド
-        for guide,gpos,click,cpos,g_color in start_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            
-        boal.draw()
-        pack1.draw()
-        pack2.draw()
-        
-    elif status == 27:
-        for y in range(15):
-                for x in range(20):
-                    floor.topleft=(40*x,40*y)
-                    floor.draw()
-                    if hock_data[y][x] ==1:
-                        box.topleft=(40*x,40*y)
-                        box.draw()
-        for y in range(3):
-            for x in range(20):
-                if goal_data[y][x] ==3:
-                    goal.topleft=(40*x,200*(y-1))
-                    goal.draw()
-
-        #Pointの描写
-        for text,pos in air_hockey_point:
-            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
-        
-        boal.draw()
-        pack1.draw()
-        pack2.draw()
-
-    elif status ==28:
-        for y in range(15):
-                for x in range(20):
-                    floor.topleft=(40*x,40*y)
-                    floor.draw()
-                    if hock_data[y][x] ==1:
-                        box.topleft=(40*x,40*y)
-                        box.draw()
-        for y in range(3):
-            for x in range(20):
-                if goal_data[y][x] ==3:
-                    goal.topleft=(40*x,200*(y-1))
-                    goal.draw()
-        screen.draw.text('GOAL!',(160,200),color = 'WHITE',gcolor = 'RED',fontsize=72)
-        
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            
-        boal.draw()
-        pack1.draw()
-        pack2.draw()
-
-    elif status ==29:
-        for y in range(15):
-                for x in range(20):
-                    floor.topleft=(40*x,40*y)
-                    floor.draw()
-                    if hock_data[y][x] ==1:
-                        box.topleft=(40*x,40*y)
-                        box.draw()
-        for y in range(3):
-            for x in range(20):
-                if goal_data[y][x] ==3:
-                    goal.topleft=(40*x,200*(y-1))
-                    goal.draw()
-        screen.draw.text('GOAL!',(160,200),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
-        
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            
-        boal.draw()
-        pack1.draw()
-        pack2.draw()
-
-    elif status==30:
-        for y in range(15):
-                for x in range(20):
-                    floor.topleft=(40*x,40*y)
-                    floor.draw()
-                    if hock_data[y][x] ==1:
-                        box.topleft=(40*x,40*y)
-                        box.draw()
-        for y in range(3):
-            for x in range(20):
-                if goal_data[y][x] ==3:
-                    goal.topleft=(40*x,200*(y-1))
-                    goal.draw()
-        screen.draw.text('Player1 win',(160,200),color = 'WHITE',gcolor = 'RED',fontsize=72)
-        
-        #終わりのガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            if guide =="menu":
-                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-        boal.draw()
-        pack1.draw()
-        pack2.draw()
-    
-
-
-
-    elif status ==31:
-        for y in range(15):
-                for x in range(20):
-                    floor.topleft=(40*x,40*y)
-                    floor.draw()
-                    if hock_data[y][x] ==1:
-                        box.topleft=(40*x,40*y)
-                        box.draw()
-        for y in range(3):
-            for x in range(20):
-                if goal_data[y][x] ==3:
-                    goal.topleft=(40*x,200*(y-1))
-                    goal.draw()
-        screen.draw.text('Player2 win',(160,200),color = 'WHITE',gcolor = 'RED',fontsize=72)
-        #終わりのガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            if guide =="menu":
-                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-        boal.draw()
-        pack1.draw()
-        pack2.draw()
 
     #壁に当てちゃだめゲーム
     elif status ==38:
