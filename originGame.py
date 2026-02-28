@@ -239,7 +239,7 @@ def space_shooter_battle_draw(status):
     space_shooter_hp = [(f'Enemy HP = {eship_hp}'    ,(50 ,50)),
                         (f'Shooter HP = {shooter_hp}',(600,50))]
     
-    now_stage = status // 3
+    now_stage = (status-1) // 3 # 4,5ならSTAGE１,７,8ならSTAGE2
     #SPACE SHOOTER STAGE1
     if status ==4 or status == 7:
         screen.draw.text(f'STAGE {now_stage}',(300,300),color ='YELLOW',fontsize =64)
@@ -290,16 +290,49 @@ def space_shooter_move_enemy(eship,status):
     width_adjust = 80
     
     if turn :
-        eship.x += 5 * (status // 3)
+        eship.x += 5 * (status // 3) # 4ならSTAGE１,７ならSTAGE2
         if eship.x + width_adjust > WIDTH:
             turn = False
     else:
-        eship.x -= 5 * (status // 3)
+        eship.x -= 5 * (status // 3) # 4ならSTAGE１,７ならSTAGE2
         if eship.x - width_adjust < 0:
             turn = True
 #####　MOON LANDER(DRAW)　#########################################################################
-def moon_lander_draw():
-    pass
+def moon_lander_draw(status):
+    #MOON LANDER　オープニング	
+    if status == 10:
+        for i in range(20):
+            screen.draw.rect(star[i],'WHITE')
+        for i in range(50):
+            screen.draw.line((350-i*3,550+i),(450+i*3,550+i),'GRAY')
+        for i in range(10):
+            screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
+            screen.draw.text("Moon Lander",(250,100),owidth=1.5,ocolor ='YELLOW',color ='BLACK',fontsize=64)
+        game_start_guide()
+        
+    moon_lander_play_draw(status)
+    
+def moon_lander_play_draw(status):
+    now_stage = ((status + 1) // 3) - 3 #今のステージを計算
+    if status == 11 or status == 14 or status == 17:
+        screen.draw.text(f'STAGE {now_stage}',(110,300),color ='YELLOW',fontsize =64)
+        if key_flg:
+            for i in range(10):
+                screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
+
+    elif status == 12 or status == 15 or status == 18:
+        if now_stage <= 2:
+            screen.draw.text("GAME CLEAR",(40,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
+            game_middle_guide()
+        else:
+            screen.draw.text("COMPLETE",(60,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
+            game_end_guide()
+            
+    elif status == 13 or status == 16 or status == 19:
+        screen.draw.text("GAME OVER",(50,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
+        game_over_guide
+    
+        
 #####　MOON LANDER(UPDATE)　#######################################################################
 def moon_lander_update():
     pass
@@ -362,102 +395,15 @@ def draw():
     elif status == 2:
         menu()
         
-    #SPACE SHOOTER オープニング
+    #SPACE SHOOTER
     elif 3 <= status <= 9 :
         space_shooter_draw(status,eship,shooter)
         
 
             
-    #MOON LANDER　オープニング	
-    elif status == 10:
-        for i in range(20):
-            screen.draw.rect(star[i],'WHITE')
-        for i in range(50):
-            screen.draw.line((350-i*3,550+i),(450+i*3,550+i),'GRAY')
-        for i in range(10):
-            screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
-            screen.draw.text("Moon Lander",(250,100),owidth=1.5,ocolor ='YELLOW',color ='BLACK',fontsize=64)
-
-        #初めのガイド
-        for guide,gpos,click,cpos,g_color in start_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-
-
-    #MOON LANDER STAGE1
-    elif status ==11:
-        screen.draw.text("STAGE 1",(110,300),color ='YELLOW',fontsize =64)
-        if key_flg:
-            for i in range(10):
-                screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
-
-    elif status ==12:
-        screen.draw.text("GAME CLEAR",(40,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
-
-        #ゲームクリア時のガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            
-    elif status ==13:
-        screen.draw.text("GAME OVER",(50,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
-        
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-
-
-    #MOON LANDER STAGE2
-    elif status ==14:
-        screen.draw.text("STAGE 2",(110,300),color ='YELLOW',fontsize =64)
-        if key_flg:
-            for i in range(10):
-                screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
-    elif status ==15:
-        screen.draw.text("GAME CLEAR",(40,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
-
-        #ゲームクリア時のガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-    elif status ==16:
-        screen.draw.text("GAME OVER",(50,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
-        
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-
-
-    #MOON LANDER STAGE3
-    elif status ==17:
-        screen.draw.text("STAGE 3",(110,300),color ='YELLOW',fontsize =64)
-        if key_flg:
-            for i in range(10):
-                screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
-
-    elif status ==18:
-        screen.draw.text("COMPLETE",(60,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
-        #終わりのガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            if guide =="menu":
-                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-        
-    elif status ==19:
-        screen.draw.text("GAME OVER",(40,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
-        
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-
+    #MOON LANDER　
+    elif 10 <= status <= 19:
+        moon_lander_draw(status)
 
     #SHOOTING SURVIVAL
     elif status ==20:
@@ -817,14 +763,6 @@ def update():
                 
         #敵を左右に動かす
         space_shooter_move_enemy(eship,status)
-##        if turn :
-##            eship.x += 10
-##            if eship.x > WIDTH:
-##                turn =False
-##        else:
-##            eship.x -= 10
-##            if eship.x <0:
-##                turn =True
 
 
         #敵のミサイルの角度        
