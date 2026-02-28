@@ -338,7 +338,72 @@ def moon_lander_update():
     pass
 #####　SHOOTING SURVIVAL(DRAW)　###################################################################
 def shooting_survival_draw():
-    pass
+    #ゲーム画面
+    if status ==21:
+        
+        for y in range(15):
+            for x in range(20):
+                if map_data[y][x] !=0:
+                    box2.topleft=(40*x,40*y)
+                    box2.draw()
+        shooting_survival_missiles = [p_missiles1,
+                                      p_missiles2,
+                                      p_missiles3,
+                                      p_missiles4,
+                                      e_missiles1,
+                                      e_missiles2,
+                                      e_missiles3,
+                                      e_missiles4]
+        for missiles_list in shooting_survival_missiles:
+            for missile in missiles_list:
+                missile.draw()
+        
+        player.draw()
+        enemy.draw()
+        #終わりのガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            if guide =="menu":
+                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+        #HPの描写
+        for text,pos in shooting_survival_hp:
+            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+
+
+
+    #Player1 勝利時
+    elif status ==22:
+        for y in range(15):
+            for x in range(20):
+                if map_data[y][x] !=0:
+                    box2.topleft=(40*x,40*y)
+                    box2.draw()
+        
+        player.draw()
+        screen.draw.text('PLAYER 1 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
+        
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+
+
+    #Player2 勝利時
+    elif status ==23:
+        for y in range(15):
+            for x in range(20):
+                if map_data[y][x] !=0:
+                    box2.topleft=(40*x,40*y)
+                    box2.draw()
+        
+        enemy.draw()
+        screen.draw.text('PLAYER 2 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 #####　SHOORING SURVIVAL(UPDATE)　#################################################################
 def shooting_survival_update():
     pass
@@ -433,22 +498,17 @@ def draw():
                     box2.topleft=(40*x,40*y)
                     box2.draw()
                     
-        for missile1 in p_missiles1:
-            missile1.draw()
-        for missile2 in p_missiles2:
-            missile2.draw()
-        for missile3 in p_missiles3:
-            missile3.draw()
-        for missile4 in p_missiles4:
-            missile4.draw()
-        for missile5 in e_missiles1:
-            missile5.draw()
-        for missile6 in e_missiles2:
-            missile6.draw()
-        for missile7 in e_missiles3:
-            missile7.draw()
-        for missile8 in e_missiles4:
-            missile8.draw()
+        shooting_survival_missiles = [p_missiles1,
+                                      p_missiles2,
+                                      p_missiles3,
+                                      p_missiles4,
+                                      e_missiles1,
+                                      e_missiles2,
+                                      e_missiles3,
+                                      e_missiles4]
+        for missiles_list in shooting_survival_missiles:
+            for missile in missiles_list:
+                missile.draw()
         
         player.draw()
         enemy.draw()
