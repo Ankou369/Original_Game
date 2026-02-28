@@ -2,11 +2,11 @@ import pgzrun
 import random
 import math
 
+#画面のサイズ
 WIDTH = 800
 HEIGHT = 600
 
 status = 1
-key_flg = False
 
 turn1 =False
 turn2 =False
@@ -167,12 +167,24 @@ def draw():
     space_shooter_hp = [(f'Enemy HP = {eship_hp}'    ,(50 ,50)),
                         (f'Shooter HP = {shooter_hp}',(600,50))]
 
+    #SHOOTING SURVIVAL HPの描写
+    shooting_survival_hp = [(f'Player1 HP = {player_hp}',(100,15)),
+                            (f'Player2 HP = {enemy_hp}' ,(500,15))]
+
+    #AIR HOCKEY POINTの描写
+    air_hockey_point = [(f'A point = {apoint}', (50 ,50)),
+                        (f'B point = {bpoint}', (600,50))]
+
+
     #初めのガイド
     start_guide = [("start",(550,150),"click Enter",(650,150),'RED'),
                    ("back" ,(550,100),"click P"    ,(650,100),'YELLOW')]
-    #終わりのガイド
-        end_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
-                     ("next", (550, 150), "click Enter", (650, 150), 'RED'   )]
+    #ゲームクリア時のガイド
+    end_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
+                 ("next", (550, 150), "click Enter", (650, 150), 'RED'   )]
+    #ゲームオーバー時のガイド
+    game_over_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
+                       ("restart", (550, 150), "click Enter", (650, 150), 'RED'   )]
         
     if status < 31 or status == 33 or status >35 :
         screen.clear()
@@ -187,6 +199,8 @@ def draw():
 
         screen.draw.text('S P A C E  G A M E S',(160,290),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
         screen.draw.text('click SPACE',(335,400),color = 'WHITE',gcolor = 'RED',fontsize=30)
+
+
 
     #選択画面
     elif status == 2:
@@ -204,20 +218,23 @@ def draw():
             picture.draw()
 
         #screen.draw.text('ONE PLAYER',(260,100),color = 'WHITE',gcolor = 'RED',fontsize=60)
+
+
         
     #SPACE SHOOTER オープニング
     elif status == 3:
         #SpaceShooterタイトル
         screen.draw.text('S P A C E  S H O O T E R',(120,290),color='WHITE',gcolor = 'YELLOW',fontsize =72)
 
-        #ガイド
+        #初めのガイド
         for guide,gpos,click,cpos,g_color in start_guide:
             screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
             screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)        
+
+
                 
     #SPACE SHOOTER STAGE1
     elif status ==4:
-        #ステージ
         screen.draw.text("STAGE 1",(300,300),color ='YELLOW',fontsize =64)
 
         #ミサイルの描写
@@ -225,43 +242,59 @@ def draw():
             missile.draw()
         for missile in e_missiles:
             missile.draw()
-        #SPACE SHOOTER HPの描写
+        #HPの描写
         for text,pos in space_shooter_hp:
             screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
             
     elif status == 5:
         screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
 
-        #終わりのガイド
+        #ゲームクリア時のガイド
         for guide,gpos,click,cpos,g_color in end_guide:
             screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
             screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
     elif status == 6:
         screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('restart',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click Enter)',(650,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+
+
+    #SPACE SHOOTER STAGE2
     elif status == 7:
         screen.draw.text("STAGE 2",(110,300),color ='YELLOW',fontsize =64)
         for missile in s_missiles:
             missile.draw()
         for missile in e_missiles:
             missile.draw()
-        screen.draw.text('Enemy HP ='+str(eship_hp),(50,50),color='YELLOW',fontsize =32)
-        screen.draw.text('shooter HP ='+str(shooter_hp),(600,50),color='YELLOW',fontsize =32)
+        #HPの描写
+        for text,pos in space_shooter_hp:
+            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+            
     elif status == 8:
         screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
+
+        #終わりのガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            if guide =="menu":
+                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
     elif status == 9:
         screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('restart',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click Enter)',(650,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        #MOON LANDER　オープニング	
+
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+
+            
+    #MOON LANDER　オープニング	
     elif status == 10:
         for i in range(20):
             screen.draw.rect(star[i],'WHITE')
@@ -270,71 +303,89 @@ def draw():
         for i in range(10):
             screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
             screen.draw.text("Moon Lander",(250,100),owidth=1.5,ocolor ='YELLOW',color ='BLACK',fontsize=64)
-        screen.draw.text('back',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('start',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(600,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        
+
+        #初めのガイド
+        for guide,gpos,click,cpos,g_color in start_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+
+
+    #MOON LANDER STAGE1
     elif status ==11:
         screen.draw.text("STAGE 1",(110,300),color ='YELLOW',fontsize =64)
         if key_flg:
             for i in range(10):
                 screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
 
     elif status ==12:
         screen.draw.text("GAME CLEAR",(40,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('next',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(650,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+
+        #ゲームクリア時のガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            
     elif status ==13:
         screen.draw.text("GAME OVER",(50,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('restart',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(650,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
+
+
+    #MOON LANDER STAGE2
     elif status ==14:
         screen.draw.text("STAGE 2",(110,300),color ='YELLOW',fontsize =64)
         if key_flg:
             for i in range(10):
                 screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
     elif status ==15:
         screen.draw.text("GAME CLEAR",(40,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('next',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(650,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+
+        #ゲームクリア時のガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
     elif status ==16:
         screen.draw.text("GAME OVER",(50,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('restart',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(650,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+
+
+    #MOON LANDER STAGE3
     elif status ==17:
         screen.draw.text("STAGE 3",(110,300),color ='YELLOW',fontsize =64)
         if key_flg:
             for i in range(10):
                 screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
 
     elif status ==18:
         screen.draw.text("COMPLETE",(60,300),owidth=1.5,ocolor='YELLOW',color='BLACK',fontsize=64)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
+        #終わりのガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            if guide =="menu":
+                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
         
     elif status ==19:
         screen.draw.text("GAME OVER",(40,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
-        screen.draw.text('menu',(550,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(650,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('restart',(550,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(650,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+
+
+    #SHOOTING SURVIVAL
     elif status ==20:
         for y in range(15):
             for x in range(20):
@@ -346,19 +397,22 @@ def draw():
         player.draw()
         enemy.draw()
         screen.draw.text('SHOOTING SURVIVAL',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-        screen.draw.text('back',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('start',(570,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(670,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        #初めのガイド
+        for guide,gpos,click,cpos,g_color in start_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+
+
+    #ゲーム画面
     elif status ==21:
         
         for y in range(15):
             for x in range(20):
-                #floor.topleft=(35*x,35*y)
-                #floor.draw()
                 if map_data[y][x] !=0:
                     box2.topleft=(40*x,40*y)
                     box2.draw()
+                    
         for missile1 in p_missiles1:
             missile1.draw()
         for missile2 in p_missiles2:
@@ -376,50 +430,56 @@ def draw():
         for missile8 in e_missiles4:
             missile8.draw()
         
-            
-        #exit.draw()
         player.draw()
         enemy.draw()
-        screen.draw.text('menu',(570,40),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,40),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
+        #終わりのガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            if guide =="menu":
+                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
-        screen.draw.text('Player1 HP ='+str(player_hp),(100,15),color='YELLOW',fontsize =32)
-        screen.draw.text('Player2 HP ='+str(enemy_hp),(500,15),color='YELLOW',fontsize =32)
+        #HPの描写
+        for text,pos in shooting_survival_hp:
+            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+
+
+
+    #Player1 勝利時
     elif status ==22:
         for y in range(15):
             for x in range(20):
-                #floor.topleft=(35*x,35*y)
-                #floor.draw()
                 if map_data[y][x] !=0:
                     box2.topleft=(40*x,40*y)
                     box2.draw()
         
         player.draw()
         screen.draw.text('PLAYER 1 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-        screen.draw.text('back',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('start',(570,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(670,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
+
+
+    #Player2 勝利時
     elif status ==23:
-         for y in range(15):
+        for y in range(15):
             for x in range(20):
-                #floor.topleft=(35*x,35*y)
-                #floor.draw()
                 if map_data[y][x] !=0:
                     box2.topleft=(40*x,40*y)
                     box2.draw()
         
-         enemy.draw()
-         screen.draw.text('PLAYER 2 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
-         screen.draw.text('menu',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-         screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-         screen.draw.text('restart',(570,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-         screen.draw.text('(click SPACE)',(670,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        enemy.draw()
+        screen.draw.text('PLAYER 2 WIN',(85,200),color='WHITE',gcolor = 'RED',fontsize =72)
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
         
     
 
-         
+    #AIR HOCKEY
     elif status==26:
         for y in range(15):
                 for x in range(20):
@@ -434,10 +494,12 @@ def draw():
                     goal.topleft=(40*x,200*(y-1))
                     goal.draw()
         screen.draw.text('AIR HOCKEY',(230,200),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
-        screen.draw.text('back',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('start',(570,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(670,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        
+        #初めのガイド
+        for guide,gpos,click,cpos,g_color in start_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            
         boal.draw()
         pack1.draw()
         pack2.draw()
@@ -455,10 +517,11 @@ def draw():
                 if goal_data[y][x] ==3:
                     goal.topleft=(40*x,200*(y-1))
                     goal.draw()
-        screen.draw.text('A point ='+str(apoint),(50,50),color='YELLOW',fontsize =32)
-        screen.draw.text('B point ='+str(bpoint),(600,50),color='YELLOW',fontsize =32)
-        
 
+        #Pointの描写
+        for text,pos in air_hockey_point:
+            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+        
         boal.draw()
         pack1.draw()
         pack2.draw()
@@ -477,10 +540,12 @@ def draw():
                     goal.topleft=(40*x,200*(y-1))
                     goal.draw()
         screen.draw.text('GOAL!',(160,200),color = 'WHITE',gcolor = 'RED',fontsize=72)
-        screen.draw.text('menu',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('start',(570,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(670,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            
         boal.draw()
         pack1.draw()
         pack2.draw()
@@ -499,10 +564,12 @@ def draw():
                     goal.topleft=(40*x,200*(y-1))
                     goal.draw()
         screen.draw.text('GOAL!',(160,200),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
-        screen.draw.text('menu',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('start',(570,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
-        screen.draw.text('(click SPACE)',(670,450),color = 'WHITE',gcolor = 'RED',fontsize=30)
+        
+        #ゲームオーバー時のガイド
+        for guide,gpos,click,cpos,g_color in game_over_guide:
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            
         boal.draw()
         pack1.draw()
         pack2.draw()
@@ -521,8 +588,12 @@ def draw():
                     goal.topleft=(40*x,200*(y-1))
                     goal.draw()
         screen.draw.text('Player1 win',(160,200),color = 'WHITE',gcolor = 'RED',fontsize=72)
-        screen.draw.text('menu',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
+        
+        #終わりのガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            if guide =="menu":
+                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
         boal.draw()
         pack1.draw()
@@ -545,12 +616,17 @@ def draw():
                     goal.topleft=(40*x,200*(y-1))
                     goal.draw()
         screen.draw.text('Player2 win',(160,200),color = 'WHITE',gcolor = 'RED',fontsize=72)
-        screen.draw.text('menu',(570,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
-        screen.draw.text('(click P)',(670,400),color = 'WHITE',gcolor = 'YELLOW',fontsize=30)
+        #終わりのガイド
+        for guide,gpos,click,cpos,g_color in end_guide:
+            if guide =="menu":
+                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
         boal.draw()
         pack1.draw()
         pack2.draw()
+
+    #壁に当てちゃだめゲーム
     elif status ==38:
         screen.draw.text("壁にあてちゃダメゲーム", (220, 250), fontname="ipaexg.ttf", color="YELLOW", fontsize=32)
         screen.draw.text('Click:SPACE',(300,300),color = 'WHITE',gcolor = 'RED',fontsize=36)
