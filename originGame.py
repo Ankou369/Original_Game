@@ -143,11 +143,55 @@ boxgi=Actor('box',topleft=(0,0))
 #ボール
 boalgi=Actor('boal',center=(0,300))
 
+#####　ガイドテキスト　############################################################################
+def game_start_guide():
+    #初めのガイド
+    start_guide = [("start",(550,150),"click Enter",(650,150),'RED'),
+                   ("back" ,(550,100),"click P"    ,(650,100),'YELLOW')]
+    #初めのガイド
+    for guide,gpos,click,cpos,g_color in start_guide:
+        screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+        screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
-#絵の描画
-def draw():
-    global status,eship,enemy,player,player_hp,enemy_hp,apoint,bpoint
+def game_middle_guide():
+    #ゲームクリア時のガイド
+    end_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
+                 ("next", (550, 150), "click Enter", (650, 150), 'RED'   )]
+    
+    #ゲームクリア時のガイド
+    for guide,gpos,click,cpos,g_color in end_guide:
+        screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+        screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
 
+def game_end_guide():
+    #ゲームクリア時のガイド
+    end_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
+                 ("next", (550, 150), "click Enter", (650, 150), 'RED'   )]
+    
+    #終わりのガイド
+    for guide,gpos,click,cpos,g_color in end_guide:
+        if guide =="menu":
+            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+def game_over_guide():
+    #ゲームオーバー時のガイド
+    game_over_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
+                       ("restart", (550, 150), "click Enter", (650, 150), 'RED'   )]
+    
+    #ゲームオーバー時のガイド
+    for guide,gpos,click,cpos,g_color in game_over_guide:
+        screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+        screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
+
+#####　ホーム画面(DRAW) ###########################################################################
+def home():
+    screen.draw.text('S P A C E  G A M E S',(160,290),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
+    screen.draw.text('click SPACE',(335,400),color = 'WHITE',gcolor = 'RED',fontsize=30)
+
+    
+#####　メニュー画面(DRAW)　########################################################################
+def menu():
     #メニュー画面のゲームのタイトル
     menu_title = [("SPACE SHOOTER"    , (130, 280), "click A", (150, 310)),
                   ("MOON LANDER"      , (570, 280), "click C", (590, 310)),
@@ -163,9 +207,112 @@ def draw():
                       air_hockey_2,
                       air_hockey_3]
 
+    #タイトル
+    screen.draw.text('S P A C E G A M E S',(160,50),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
+
+    #メニュー画面のゲームのタイトル
+    for title, tpos, click, cpos in menu_title:
+        screen.draw.text(title, tpos, color='WHITE', gcolor='RED', fontsize=20)
+        screen.draw.text(click, cpos, color='WHITE', gcolor='YELLOW', fontsize=30)
+
+    #メニュー画面の画像
+    for picture in menu_picture:
+        picture.draw()
+
+    #screen.draw.text('ONE PLAYER',(260,100),color = 'WHITE',gcolor = 'RED',fontsize=60)
+    
+    
+#####　SPACE SHOOTER(DRAW)　#######################################################################
+def space_shooter_draw(status,eship,player):
     #SPACE SHOOTER HPの描写
     space_shooter_hp = [(f'Enemy HP = {eship_hp}'    ,(50 ,50)),
                         (f'Shooter HP = {shooter_hp}',(600,50))]
+    
+    #SPACE SHOOTER オープニング
+    if status == 3:
+        screen.draw.text('S P A C E  S H O O T E R',(120,290),color='WHITE',gcolor = 'YELLOW',fontsize =72)
+        game_start_guide()   
+
+                
+    #SPACE SHOOTER STAGE1
+    elif status ==4:
+        screen.draw.text("STAGE 1",(300,300),color ='YELLOW',fontsize =64)
+
+        #ミサイルの描写
+        for missile in s_missiles:
+            missile.draw()
+        for missile in e_missiles:
+            missile.draw()
+        #HPの描写
+        for text,pos in space_shooter_hp:
+            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+            
+    elif status == 5:
+        screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
+        game_middle_guide()
+
+    elif status == 6:
+        screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
+        game_over_guide()
+
+    #SPACE SHOOTER STAGE2
+    elif status == 7:
+        screen.draw.text("STAGE 2",(110,300),color ='YELLOW',fontsize =64)
+        for missile in s_missiles:
+            missile.draw()
+        for missile in e_missiles:
+            missile.draw()
+        #HPの描写
+        for text,pos in space_shooter_hp:
+            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+            
+    elif status == 8:
+        screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
+        game_end_guide()
+
+    elif status == 9:
+        screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
+        game_over_guide()
+    
+
+
+    
+    
+    
+    
+    
+#####　SPACE SHOOTER(UPDATE)　#####################################################################
+def space_shooter_update():
+    pass
+#####　MOON LANDER(DRAW)　#########################################################################
+def moon_lander_draw():
+    pass
+#####　MOON LANDER(UPDATE)　#######################################################################
+def moon_lander_update():
+    pass
+#####　SHOOTING SURVIVAL(DRAW)　###################################################################
+def shooting_survival_draw():
+    pass
+#####　SHOORING SURVIVAL(UPDATE)　#################################################################
+def shooting_survival_update():
+    pass
+#####　AIR HOCEKY(DRAW)　##########################################################################
+def air_hockey_draw():
+    pass
+#####　AIR HOCKEY(UPDATE)　########################################################################
+def air_hockey_update():
+    pass
+#####　壁に当てちゃだめゲーム(DRAW)　##############################################################
+def no_touch_game_draw():
+    pass
+#####　壁に当てちゃだめゲーム(UPDATE)　############################################################
+def no_touch_game_update():
+    pass
+###################################################################################################
+
+#絵の描画
+def draw():
+    global status,eship,enemy,player,player_hp,enemy_hp,apoint,bpoint
 
     #SHOOTING SURVIVAL HPの描写
     shooting_survival_hp = [(f'Player1 HP = {player_hp}',(100,15)),
@@ -196,102 +343,16 @@ def draw():
    
     #ホーム
     if status ==1:
-
-        screen.draw.text('S P A C E  G A M E S',(160,290),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
-        screen.draw.text('click SPACE',(335,400),color = 'WHITE',gcolor = 'RED',fontsize=30)
-
-
+        home()
 
     #選択画面
     elif status == 2:
-        
-        #タイトル
-        screen.draw.text('S P A C E G A M E S',(160,50),color = 'WHITE',gcolor = 'YELLOW',fontsize=72)
-
-        #メニュー画面のゲームのタイトル
-        for title, tpos, click, cpos in menu_title:
-            screen.draw.text(title, tpos, color='WHITE', gcolor='RED', fontsize=20)
-            screen.draw.text(click, cpos, color='WHITE', gcolor='YELLOW', fontsize=30)
-
-        #メニュー画面の画像
-        for picture in menu_picture:
-            picture.draw()
-
-        #screen.draw.text('ONE PLAYER',(260,100),color = 'WHITE',gcolor = 'RED',fontsize=60)
-
-
+        menu()
         
     #SPACE SHOOTER オープニング
-    elif status == 3:
-        #SpaceShooterタイトル
-        screen.draw.text('S P A C E  S H O O T E R',(120,290),color='WHITE',gcolor = 'YELLOW',fontsize =72)
-
-        #初めのガイド
-        for guide,gpos,click,cpos,g_color in start_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)        
-
-
-                
-    #SPACE SHOOTER STAGE1
-    elif status ==4:
-        screen.draw.text("STAGE 1",(300,300),color ='YELLOW',fontsize =64)
-
-        #ミサイルの描写
-        for missile in s_missiles:
-            missile.draw()
-        for missile in e_missiles:
-            missile.draw()
-        #HPの描写
-        for text,pos in space_shooter_hp:
-            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
-            
-    elif status == 5:
-        screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
-
-        #ゲームクリア時のガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-    elif status == 6:
-        screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
-
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-
-
-    #SPACE SHOOTER STAGE2
-    elif status == 7:
-        screen.draw.text("STAGE 2",(110,300),color ='YELLOW',fontsize =64)
-        for missile in s_missiles:
-            missile.draw()
-        for missile in e_missiles:
-            missile.draw()
-        #HPの描写
-        for text,pos in space_shooter_hp:
-            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
-            
-    elif status == 8:
-        screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
-
-        #終わりのガイド
-        for guide,gpos,click,cpos,g_color in end_guide:
-            if guide =="menu":
-                screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-                screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
-    elif status == 9:
-        screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
-
-        #ゲームオーバー時のガイド
-        for guide,gpos,click,cpos,g_color in game_over_guide:
-            screen.draw.text(guide, gpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-            screen.draw.text(click, cpos, color = 'WHITE', gcolor = g_color, fontsize=30)
-
+    elif 3 <= status <= 9 :
+        space_shooter_draw(status,eship,shooter)
+        
 
             
     #MOON LANDER　オープニング	
@@ -1161,7 +1222,7 @@ def on_key_down(key):
                 e_missiles=[]
                 status = 4
         elif status == 5 or status == 9:
-                eship_hp =30
+                eship_hp =1
                 shooter_hp=10
                 s_missiles=[]
                 e_missiles=[]
