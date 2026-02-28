@@ -224,19 +224,25 @@ def menu():
     
 #####　SPACE SHOOTER(DRAW)　#######################################################################
 def space_shooter_draw(status,eship,player):
+    #SPACE SHOOTER オープニング
+    if status == 3:
+        screen.draw.text('S P A C E  S H O O T E R',(120,290),color='WHITE',gcolor = 'YELLOW',fontsize =72)
+        game_start_guide()
+
+    else:
+        space_shooter_battle_draw(status)
+    
+
+                
+def space_shooter_battle_draw(status):
     #SPACE SHOOTER HPの描写
     space_shooter_hp = [(f'Enemy HP = {eship_hp}'    ,(50 ,50)),
                         (f'Shooter HP = {shooter_hp}',(600,50))]
     
-    #SPACE SHOOTER オープニング
-    if status == 3:
-        screen.draw.text('S P A C E  S H O O T E R',(120,290),color='WHITE',gcolor = 'YELLOW',fontsize =72)
-        game_start_guide()   
-
-                
+    now_stage = status // 3
     #SPACE SHOOTER STAGE1
-    elif status ==4:
-        screen.draw.text("STAGE 1",(300,300),color ='YELLOW',fontsize =64)
+    if status ==4 or status == 7:
+        screen.draw.text(f'STAGE {now_stage}',(300,300),color ='YELLOW',fontsize =64)
 
         #ミサイルの描写
         for missile in s_missiles:
@@ -247,33 +253,17 @@ def space_shooter_draw(status,eship,player):
         for text,pos in space_shooter_hp:
             screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
             
-    elif status == 5:
+    elif status == 5 or status ==8:
         screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
-        game_middle_guide()
-
-    elif status == 6:
-        screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
-        game_over_guide()
-
-    #SPACE SHOOTER STAGE2
-    elif status == 7:
-        screen.draw.text("STAGE 2",(110,300),color ='YELLOW',fontsize =64)
-        for missile in s_missiles:
-            missile.draw()
-        for missile in e_missiles:
-            missile.draw()
-        #HPの描写
-        for text,pos in space_shooter_hp:
-            screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
+        if now_stage == 1:
+            game_middle_guide()
+        else:
+            game_end_guide()
             
-    elif status == 8:
-        screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
-        game_end_guide()
 
-    elif status == 9:
+    elif status == 6 or status == 9:
         screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
         game_over_guide()
-    
 
 
     
@@ -284,6 +274,29 @@ def space_shooter_draw(status,eship,player):
 #####　SPACE SHOOTER(UPDATE)　#####################################################################
 def space_shooter_update():
     pass
+
+def space_shooter_enemy_missile(eship):
+    angle = eship.angle_to(shooter)
+    missile1 = Actor('emissile.png',(eship.x-25,eship.y+10))
+    missile2 = Actor('emissile.png',(eship.x+25,eship.y+10))
+    missile1.angle =90 +angle
+    missile2.angle =90 +angle
+    e_missiles.append(missile1)
+    e_missiles.append(missile2)
+
+#敵を左右に動かす
+def space_shooter_move_enemy(eship,status):
+    global turn
+    width_adjust = 80
+    
+    if turn :
+        eship.x += 5 * (status // 3)
+        if eship.x + width_adjust > WIDTH:
+            turn = False
+    else:
+        eship.x -= 5 * (status // 3)
+        if eship.x - width_adjust < 0:
+            turn = True
 #####　MOON LANDER(DRAW)　#########################################################################
 def moon_lander_draw():
     pass
@@ -762,29 +775,13 @@ def update():
         if keyboard.right:
             if shooter.x < WIDTH-47:
                 shooter.x += 3
-                
-        #敵を左右に動かす
-        if turn :
-            eship.x += 5
-            if eship.x > WIDTH:
-                turn =False
-        else:
-            eship.x -= 5
-            if eship.x <0:
-                turn =True
+        space_shooter_move_enemy(eship,status)       
 
 
         #敵のミサイルの角度        
         if eshot ==0:
-            angle = eship.angle_to(shooter)
-            missile1 = Actor('emissile.png',(eship.x-25,eship.y+10))
-            missile2 = Actor('emissile.png',(eship.x+25,eship.y+10))
-            missile3 = Actor('emissile.png',(eship.x+25,eship.y+10))
-            missile1.angle =90 +angle
-            missile2.angle =90 +angle
-            e_missiles.append(missile1)
-            e_missiles.append(missile2)       
-            eshot =60
+            space_shooter_enemy_missile(eship)
+            eshot = 60 #時間をリセット 
         else:
             eshot -=1
 
@@ -819,26 +816,21 @@ def update():
                 shooter.x += 3
                 
         #敵を左右に動かす
-        if turn :
-            eship.x += 10
-            if eship.x > WIDTH:
-                turn =False
-        else:
-            eship.x -= 10
-            if eship.x <0:
-                turn =True
+        space_shooter_move_enemy(eship,status)
+##        if turn :
+##            eship.x += 10
+##            if eship.x > WIDTH:
+##                turn =False
+##        else:
+##            eship.x -= 10
+##            if eship.x <0:
+##                turn =True
 
 
         #敵のミサイルの角度        
         if eshot ==0:
-            angle = eship.angle_to(shooter)
-            missile1 = Actor('emissile.png',(eship.x-25,eship.y+10))
-            missile2 = Actor('emissile.png',(eship.x+25,eship.y+10))
-            missile1.angle =90 +angle
-            missile2.angle =90 +angle
-            e_missiles.append(missile1)
-            e_missiles.append(missile2)       
-            eshot =30
+            space_shooter_enemy_missile(eship)       
+            eshot =30 #時間をリセット
         else:
             eshot -=1
 
@@ -862,6 +854,9 @@ def update():
                 if eship_hp ==0:
                     status =8
                 s_missiles.remove(missile)
+        
+        
+                
     #STAGE 1
     if status ==11:
         if keyboard.up:
