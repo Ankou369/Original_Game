@@ -1,6 +1,7 @@
 import pgzrun
 import random
 import math
+from dataclasses import dataclass
 
 #画面のサイズ
 WIDTH = 800
@@ -143,6 +144,17 @@ boxgi=Actor('box',topleft=(0,0))
 #ボール
 boalgi=Actor('boal',center=(0,300))
 
+#MOON LANDER ENEMY CLASS
+@dataclass 
+class moon_lander_enemy_record:
+    stage:int
+    acceleration:float
+    speed:float
+
+table = [moon_lander_enemy_record(1, -0.1, 1.0),
+         moon_lander_enemy_record(2, -0.2, 1.0),
+         moon_lander_enemy_record(3, -0.3, 1.5)]
+
 #####　ガイドテキスト　############################################################################
 def game_start_guide():
     #初めのガイド
@@ -229,6 +241,9 @@ def space_shooter_draw(status,eship,player):
         screen.draw.text('S P A C E  S H O O T E R',(120,290),color='WHITE',gcolor = 'YELLOW',fontsize =72)
         game_start_guide()
 
+        shooter.draw()
+        eship.draw()
+
     else:
         space_shooter_battle_draw(status)
     
@@ -252,9 +267,12 @@ def space_shooter_battle_draw(status):
         #HPの描写
         for text,pos in space_shooter_hp:
             screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
-            
+
+        shooter.draw()
+        eship.draw()
     elif status == 5 or status ==8:
         screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
+        shooter.draw()
         if now_stage == 1:
             game_middle_guide()
         else:
@@ -264,6 +282,7 @@ def space_shooter_battle_draw(status):
     elif status == 6 or status == 9:
         screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
         game_over_guide()
+        eship.draw()
 
 
     
@@ -299,7 +318,9 @@ def space_shooter_move_enemy(eship,status):
             turn = True
 #####　MOON LANDER(DRAW)　#########################################################################
 def moon_lander_draw(status):
-    #MOON LANDER　オープニング	
+    #MOON LANDER　オープニング
+    moon_lander_draw_stage()
+    
     if status == 10:
         for i in range(20):
             screen.draw.rect(star[i],'WHITE')
@@ -309,10 +330,11 @@ def moon_lander_draw(status):
             screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
             screen.draw.text("Moon Lander",(250,100),owidth=1.5,ocolor ='YELLOW',color ='BLACK',fontsize=64)
         game_start_guide()
-        
-    moon_lander_play_draw(status)
+    else:
+        moon_lander_play_draw(status)
     
 def moon_lander_play_draw(status):
+    global key_flg
     now_stage = ((status + 1) // 3) - 3 #今のステージを計算
     if status == 11 or status == 14 or status == 17:
         screen.draw.text(f'STAGE {now_stage}',(110,300),color ='YELLOW',fontsize =64)
@@ -330,12 +352,39 @@ def moon_lander_play_draw(status):
             
     elif status == 13 or status == 16 or status == 19:
         screen.draw.text("GAME OVER",(50,300),owidth=1.5,ocolor='RED',color='BLACK',fontsize=64)
-        game_over_guide
+        game_over_guide()
+
+def moon_lander_draw_stage():
+    for i in range(20):
+        screen.draw.rect(star[i],'WHITE')
+
+    for i in range(50):
+        screen.draw.line((350-i*3,550+i),(450+i*3,550+i),'GRAY')
+    rocket.draw()
+    
     
         
 #####　MOON LANDER(UPDATE)　#######################################################################
-def moon_lander_update():
-    pass
+def moon_lander_update(speed,status):
+    global key_flg
+    now_stage = ((status - 2) // 3) - 2
+    if keyboard.up:
+        key_flg = True
+        acceleration = table[now_stage - 1].acceleration
+    else:
+        key_flg = False
+        acceleration = -(table[now_stage - 1].acceleration)
+    speed += acceleration
+    rocket.y += speed
+    if rocket.y > 500:
+        if speed < table[now_stage - 1].speed:
+            status = 9  + (now_stage * 3) #STAGE1なら12,STAGE2なら15,STAGE3なら18
+            
+        else:
+            status = 10 + (now_stage * 3) #STAGE1なら13,STAGE2なら16,STAGE3なら19
+            anime_r =animate(rocket, 'bounce_start_end',1,angle=45)
+
+    return speed,status
 #####　SHOOTING SURVIVAL(DRAW)　###################################################################
 def shooting_survival_draw(status):
     #SHOOTING SURVIVAL　オープニング
@@ -468,8 +517,31 @@ def air_hockey_draw_point():
 def air_hockey_update():
     pass
 #####　壁に当てちゃだめゲーム(DRAW)　##############################################################
-def no_touch_game_draw():
-    pass
+def no_touch_game_draw(status):
+    if status ==38:
+        screen.draw.text("壁にあてちゃダメゲーム", (220, 250), fontname="ipaexg.ttf", color="YELLOW", fontsize=32)
+        game_start_guide()
+    elif status == 39:
+        no_touch_game_draw_stage()
+        screen.draw.text("UPキー：上へ", (50, 600), fontname="ipaexg.ttf", color="YELLOW", fontsize=32)
+        screen.draw.text("DOWNキー：下へ", (100, 600), fontname="ipaexg.ttf", color="YELLOW", fontsize=32)
+    elif status ==40:
+        no_touch_game_draw_stage()
+        screen.draw.text("ダメ～", (220, 250), fontname="ipaexg.ttf", color="RED", fontsize=32)
+                        
+    elif status ==41:
+        no_touch_game_draw_stage()
+        screen.draw.text('goal',(160,200),color = 'WHITE',gcolor = 'BLUE',fontsize=72)
+
+def no_touch_game_draw_stage():
+    for y in range(15):
+            for x in range(20):
+                floorgi.topleft=(40*x,40*y)
+                floorgi.draw()
+                if map_giza[y][x] ==1:
+                    boxgi.topleft=(40*x,40*y)
+                    boxgi.draw()
+                    boalgi.draw()
 #####　壁に当てちゃだめゲーム(UPDATE)　############################################################
 def no_touch_game_update():
     pass
@@ -478,16 +550,6 @@ def no_touch_game_update():
 #絵の描画
 def draw():
     global status,eship,enemy,player,player_hp,enemy_hp,apoint,bpoint
-
-    #初めのガイド
-    start_guide = [("start",(550,150),"click Enter",(650,150),'RED'),
-                   ("back" ,(550,100),"click P"    ,(650,100),'YELLOW')]
-    #ゲームクリア時のガイド
-    end_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
-                 ("next", (550, 150), "click Enter", (650, 150), 'RED'   )]
-    #ゲームオーバー時のガイド
-    game_over_guide = [("menu", (550, 100), "click P"    , (650, 100), 'YELLOW'),
-                       ("restart", (550, 150), "click Enter", (650, 150), 'RED'   )]
         
     if status < 31 or status == 33 or status >35 :
         screen.clear()
@@ -529,60 +591,9 @@ def draw():
         
 
     #壁に当てちゃだめゲーム
-    elif status ==38:
-        screen.draw.text("壁にあてちゃダメゲーム", (220, 250), fontname="ipaexg.ttf", color="YELLOW", fontsize=32)
-        screen.draw.text('Click:SPACE',(300,300),color = 'WHITE',gcolor = 'RED',fontsize=36)
-    elif status == 39:
-        screen.draw.text("UPキー：上へ", (50, 600), fontname="ipaexg.ttf", color="YELLOW", fontsize=32)
-        screen.draw.text("DOWNキー：下へ", (100, 600), fontname="ipaexg.ttf", color="YELLOW", fontsize=32)
-        for y in range(15):
-                for x in range(20):
-                    floorgi.topleft=(40*x,40*y)
-                    floorgi.draw()
-                    if map_giza[y][x] ==1:
-                        boxgi.topleft=(40*x,40*y)
-                        boxgi.draw()
-                        boalgi.draw()
-    elif status ==40:
-        
-        for y in range(15):
-                for x in range(20):
-                    floorgi.topleft=(40*x,40*y)
-                    floorgi.draw()
-                    if map_giza[y][x] ==1:
-                        boxgi.topleft=(40*x,40*y)
-                        boxgi.draw()
-                        boalgi.draw()
-        screen.draw.text("ダメ～", (220, 250), fontname="ipaexg.ttf", color="RED", fontsize=32)
-                        
-    elif status ==41:
-        for y in range(15):
-                for x in range(20):
-                    floorgi.topleft=(40*x,40*y)
-                    floorgi.draw()
-                    if map_giza[y][x] ==1:
-                        boxgi.topleft=(40*x,40*y)
-                        boxgi.draw()
-        screen.draw.text('goal',(160,200),color = 'WHITE',gcolor = 'BLUE',fontsize=72)
+    elif 38 <= status <= 41 :
+        no_touch_game_draw(status)
 
-        
-    
-        
-
-    if status ==3 or status == 4 or status == 7:
-        shooter.draw()
-        eship.draw()
-    if status ==5 or status ==8:
-        shooter.draw()
-    if status ==6 or status == 9:
-        eship.draw()
-    if status >=10 and status <=19:
-        for i in range(20):
-            screen.draw.rect(star[i],'WHITE')
-
-        for i in range(50):
-            screen.draw.line((350-i*3,550+i),(450+i*3,550+i),'GRAY')
-        rocket.draw()
         
 
 
@@ -674,63 +685,10 @@ def update():
                 if eship_hp ==0:
                     status =8
                 s_missiles.remove(missile)
-        
-        
-                
-    #STAGE 1
-    if status ==11:
-        if keyboard.up:
-            key_flg =True
-            acceleration =-0.1
 
-        else:
-            key_flg =False
-            acceleration =0.1
-        speed += acceleration
-        rocket.y +=speed
-        if rocket.y > 500:
-            if speed<1.0:
-                status =12
-                
-            else:
-                status =13
-                anime_r =animate(rocket, 'bounce_start_end',1,angle=45)
-    #STAGE 2
-    elif status ==14:
-        if keyboard.up:
-            key_flg =True
-            acceleration =-0.2
-
-        else:
-            key_flg =False
-            acceleration =0.2
-        speed += acceleration
-        rocket.y +=speed
-        if rocket.y > 500:
-            if speed<1.0:
-                status =15
-                
-            else:
-                status =16
-                anime_r =animate(rocket, 'bounce_start_end',1,angle=45)
-    #STAGE 3
-    elif status ==17:
-        if keyboard.up:
-            key_flg =True
-            acceleration =-0.3
-
-        else:
-            key_flg =False
-            acceleration =0.3
-        speed += acceleration
-        rocket.y +=speed
-        if rocket.y > 500:
-            if speed<1.5:
-                status =18
-                
-            else:
-                status =19
-                anime_r =animate(rocket, 'bounce_start_end',1,angle=45)
+    #MOON LANDER
+    if status == 11 or status == 14 or status == 17:
+        speed,status = moon_lander_update(speed,status)
 
     #MAZE
     elif status ==21:
