@@ -291,10 +291,42 @@ def space_shooter_battle_draw(status):
     
     
 #####　SPACE SHOOTER(UPDATE)　#####################################################################
-def space_shooter_update():
-    pass
+def space_shooter_update(status,eship,e_missiles,s_missiles,shooter_hp,eship_hp,eshot):
+    #自機のキー操作
+    space_shooter_move_shooter()
+    
+    #敵を左右に動かす
+    space_shooter_move_enemy(status)       
 
-def space_shooter_enemy_missile(eship):
+
+    #敵のミサイルの角度        
+    if eshot ==0:
+        space_shooter_enemy_missile_angle(eship)
+        eshot = 60 #時間をリセット 
+    else:
+        eshot -=1
+        
+
+    #敵のミサイル
+    status,shooter_hp = space_shooter_enemy_missile(status,e_missiles,shooter_hp)
+        
+
+    #自機のミサイル
+    status,eship_hp = space_shooter_shooter_missile(status,s_missiles,eship_hp)
+
+    return status,shooter_hp,eship_hp,eshot
+
+
+#自機のキー操作
+def space_shooter_move_shooter():
+    if keyboard.left:
+        if shooter.x>47:
+            shooter.x -= 3
+    if keyboard.right:
+        if shooter.x < WIDTH-47:
+            shooter.x += 3
+
+def space_shooter_enemy_missile_angle(eship):
     angle = eship.angle_to(shooter)
     missile1 = Actor('emissile.png',(eship.x-25,eship.y+10))
     missile2 = Actor('emissile.png',(eship.x+25,eship.y+10))
@@ -304,7 +336,7 @@ def space_shooter_enemy_missile(eship):
     e_missiles.append(missile2)
 
 #敵を左右に動かす
-def space_shooter_move_enemy(eship,status):
+def space_shooter_move_enemy(status):
     global turn
     width_adjust = 80
     
@@ -316,6 +348,33 @@ def space_shooter_move_enemy(eship,status):
         eship.x -= 5 * (status // 3) # 4ならSTAGE１,７ならSTAGE2
         if eship.x - width_adjust < 0:
             turn = True
+#敵のミサイル
+def space_shooter_enemy_missile(status,e_missiles,shooter_hp):
+    now_stage = (status - 1) // 3
+    for missile in e_missiles:
+        red =math.radians(-(missile.angle-90))
+        missile.x += (math.cos(red)) * 3
+        missile.y += (math.sin(red)) * 3
+        rect =Rect(missile.topleft,(11,35))
+        if shooter.colliderect(rect):
+            shooter_hp -= 1
+            if shooter_hp ==0:
+                status= 3 + (3 * now_stage)
+            e_missiles.remove(missile)
+    return status,shooter_hp
+
+#自機のミサイル
+def space_shooter_shooter_missile(status,s_missiles,eship_hp):
+    now_stage = (status - 1) // 3
+    for missile in s_missiles:
+        missile.y -=10
+        rect =Rect(missile.topleft,(16,22))
+        if eship.colliderect(rect):
+            eship_hp -= 1
+            if eship_hp ==0:
+                status = 2 + (3 * now_stage)
+            s_missiles.remove(missile)
+    return status,eship_hp
 #####　MOON LANDER(DRAW)　#########################################################################
 def moon_lander_draw(status):
     #MOON LANDER　オープニング
@@ -451,23 +510,58 @@ def shooting_survival_draw_missiles():
     
     
 #####　SHOORING SURVIVAL(UPDATE)　#################################################################
-def shooting_survival_p_missiles_update(missiles,mx,my,enemy_hp,status):
-        for missile in p_missiles:
-            missile.x += mx
-            missile.y += my
-            rect = Rect(missile.topleft, (15, 20))
-            x = missile.x
-            y = missile.y
+#弾の衝突判定
+def shou(a,b):
+    for y in range(15):
+        for x in range(20):
+            if map_data[y][x] !=0:
+                
+                if ((x*40 < a)
+                and (a<x*40+40) 
+                and (y*40<b) 
+                and (b< y*40+40)):
+                    return 1
+#playerのミサイル
+def shooting_survival_p_missiles_update(p_missiles,mx,my,enemy_hp,status):
+    for missile in p_missiles:
+        missile.x += mx
+        missile.y += my
+        rect = Rect(missile.topleft, (15, 20))
+        x = missile.x
+        y = missile.y
+        
+        if shou(x, y) == 1:
+            p_missiles.remove(missile)
             
-            if shou(x, y) == 1:
-                p_missiles.remove(missile)
+        if enemy.colliderect(rect):
+            enemy_hp -= 1
+            p_missiles.remove(missile)
+            
+            if enemy_hp == 0:
+                status = 22
                 
-            if enemy.colliderect(rect):
-                enemy_hp -= 1
-                p_missiles.remove(missile)
+    return  enemy_hp,status
+
+#enemyのミサイル
+def shooting_survival_e_missiles_update(e_missiles,mx,my,player_hp,status):
+    for missile in p_missiles:
+        missile.x += mx
+        missile.y += my
+        rect = Rect(missile.topleft, (15, 20))
+        x = missile.x
+        y = missile.y
+        
+        if shou(x, y) == 1:
+            e_missiles.remove(missile)
+            
+        if player.colliderect(rect):
+            player_hp -= 1
+            e_missiles.remove(missile)
+            
+            if player_hp == 0:
+                status = 23
                 
-                if enemy_hp == 0:
-                    return status = 22
+    return  player_hp,status
 #####　AIR HOCEKY(DRAW)　##########################################################################
 def air_hockey_draw(status):
     air_hockey_draw_stage()
@@ -560,6 +654,33 @@ def no_touch_game_draw_stage():
 #####　壁に当てちゃだめゲーム(UPDATE)　############################################################
 def no_touch_game_update():
     pass
+
+def atari(boalgi,status):
+    if boalgi.x>0:
+        if boalgi.y<60 or boalgi.y>540:
+         status=40
+    if boalgi.x>60:
+        if boalgi.y<100 or boalgi.y>500:
+            status=40
+
+    if boalgi.x>140:
+        if boalgi.y<140 or boalgi.y>460:
+             status=40
+
+    if boalgi.x>220:
+        if boalgi.y<180 or boalgi.y>420:
+            status=40
+
+    if boalgi.x>300:
+        if boalgi.y<220 or boalgi.y>380:
+            status=40
+
+    if boalgi.x>380:
+        if boalgi.y<260 or boalgi.y>340:
+            status=40
+    if boalgi.x>780:
+        status=41
+    return status
 ###################################################################################################
 
 #絵の描画
@@ -621,85 +742,11 @@ def update():
         star[i].y += i
         if star[i].y > HEIGHT:
             star[i].y =0
-    if status ==4 :
-        #自機のキー操作
-        if keyboard.left:
-            if shooter.x>47:
-                shooter.x -= 3
-        if keyboard.right:
-            if shooter.x < WIDTH-47:
-                shooter.x += 3
-        space_shooter_move_enemy(eship,status)       
-
-
-        #敵のミサイルの角度        
-        if eshot ==0:
-            space_shooter_enemy_missile(eship)
-            eshot = 60 #時間をリセット 
-        else:
-            eshot -=1
-
-        #敵のミサイル
-        for missile in e_missiles:
-            red =math.radians(-(missile.angle-90))
-            missile.x += (math.cos(red)) * 3
-            missile.y += (math.sin(red)) * 3
-            rect =Rect(missile.topleft,(11,35))
-            if shooter.colliderect(rect):
-                shooter_hp -= 1
-                if shooter_hp ==0:
-                    status=6
-                e_missiles.remove(missile)
-        #自機のミサイル
-        for missile in s_missiles:
-            missile.y -=10
-            rect =Rect(missile.topleft,(16,22))
-            if eship.colliderect(rect):
-                eship_hp -= 1
-                if eship_hp ==0:
-                    status =5
-                s_missiles.remove(missile)
-
-    if status ==7:
-        #自機のキー操作
-        if keyboard.left:
-            if shooter.x>47:
-                shooter.x -= 3
-        if keyboard.right:
-            if shooter.x < WIDTH-47:
-                shooter.x += 3
-                
-        #敵を左右に動かす
-        space_shooter_move_enemy(eship,status)
-
-
-        #敵のミサイルの角度        
-        if eshot ==0:
-            space_shooter_enemy_missile(eship)       
-            eshot =30 #時間をリセット
-        else:
-            eshot -=1
-
-        #敵のミサイル
-        for missile in e_missiles:
-            red =math.radians(-(missile.angle-90))
-            missile.x += (math.cos(red)) * 3
-            missile.y += (math.sin(red)) * 3
-            rect =Rect(missile.topleft,(11,35))
-            if shooter.colliderect(rect):
-                shooter_hp -= 1
-                if shooter_hp ==0:
-                    status=9
-                e_missiles.remove(missile)
-        #自機のミサイル
-        for missile in s_missiles:
-            missile.y -=10
-            rect =Rect(missile.topleft,(16,22))
-            if eship.colliderect(rect):
-                eship_hp -= 1
-                if eship_hp ==0:
-                    status =8
-                s_missiles.remove(missile)
+        
+    #SPACE SHOOTER 
+    if status ==4 or status == 7:
+        status,shooter_hp,eship_hp,eshot = space_shooter_update(status,eship,e_missiles,s_missiles,shooter_hp,eship_hp,eshot)
+        
 
     #MOON LANDER
     if status == 11 or status == 14 or status == 17:
@@ -707,125 +754,33 @@ def update():
 
     #MAZE
     elif status ==21:
-        def shou(a,b):
-            for y in range(15):
-                for x in range(20):
-                    if map_data[y][x] !=0:
-                        
-                        if ((x*40 < a)
-                        and (a<x*40+40) 
-                        and (y*40<b) 
-                        and (b< y*40+40)):
-                            return 1;
-
-
-            
         if a==1:
-            for missile1 in p_missiles1:
-                missile1.y -=10
-                rect =Rect(missile1.topleft,(15,20))
-                x=missile1.x
-                y=missile1.y
-                if shou(x,y)==1:
-                    p_missiles1.remove(missile1)
-                if enemy.colliderect(rect):
-                    enemy_hp -= 1
-                    p_missiles1.remove(missile1)
-                    if enemy_hp ==0:
-                        status=22
+            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles1, 0, -10, enemy_hp, status)
+
         if b==1:
-            for missile2 in p_missiles2:
-                missile2.y +=10
-                rect =Rect(missile2.topleft,(15,20))
-                x=missile2.x
-                y=missile2.y
-                if shou(x,y)==1:
-                    p_missiles2.remove(missile2)
-                elif enemy.colliderect(rect):
-                    enemy_hp -= 1
-                    p_missiles2.remove(missile2)
-                    if enemy_hp ==0:
-                        status=22
+            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles2, 0, 10, enemy_hp, status)
+    
         if c==1:
-            for missile3 in p_missiles3:
-                missile3.x -=10
-                rect =Rect(missile3.topleft,(15,20))
-                x=missile3.x
-                y=missile3.y
-                if shou(x,y)==1:
-                    p_missiles3.remove(missile3)
-                elif enemy.colliderect(rect):
-                    enemy_hp -= 1
-                    p_missiles3.remove(missile3)
-                    if enemy_hp ==0:
-                        status=22
+            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles3, -10, 0, enemy_hp, status)
+            
         if d==1:
-            for missile4 in p_missiles4:
-                missile4.x +=10
-                rect =Rect(missile4.topleft,(15,20))
-                x=missile4.x
-                y=missile4.y
-                if shou(x,y)==1:
-                    p_missiles4.remove(missile4)
-                elif enemy.colliderect(rect):
-                    enemy_hp -= 1
-                    p_missiles4.remove(missile4)
-                    if enemy_hp ==0:
-                        status=22
+            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles4, 10, 0, enemy_hp, status)
+
         if o==1:
-            for missile5 in e_missiles1:
-                missile5.y -=10
-                rect =Rect(missile5.topleft,(15,20))
-                x=missile5.x
-                y=missile5.y
-                if shou(x,y)==1:
-                    e_missiles1.remove(missile5)
-                elif player.colliderect(rect):
-                    player_hp -= 1
-                    e_missiles1.remove(missile5)
-                    if player_hp ==0:
-                        status=23
+            player_hp, status = shooting_survival_p_missiles_update(e_missiles1, 0, -10, player_hp, status)
+            
         if j==1:
-            for missile6 in e_missiles2:
-                missile6.y +=10
-                rect =Rect(missile6.topleft,(15,20))
-                x=missile6.x
-                y=missile6.y
-                if shou(x,y)==1:
-                    e_missiles2.remove(missile6)
-                elif player.colliderect(rect):
-                    player_hp -= 1
-                    e_missiles2.remove(missile6)
-                    if player_hp ==0:
-                        status=23
+            player_hp, status = shooting_survival_p_missiles_update(e_missiles2, 0, 10, player_hp, status)
+            
         if k==1:
-            for missile7 in e_missiles3:
-                missile7.x -=10
-                rect =Rect(missile7.topleft,(15,20))
-                x=missile7.x
-                y=missile7.y
-                if shou(x,y)==1:
-                    e_missiles3.remove(missile7)
-                elif player.colliderect(rect):
-                    player_hp -= 1
-                    e_missiles3.remove(missile7)
-                    if player_hp ==0:
-                        status=23
+            player_hp, status = shooting_survival_p_missiles_update(e_missiles3, -10, 0, player_hp, status)
+            
         if l==1:
-            for missile8 in e_missiles4:
-                missile8.x +=10
-                rect =Rect(missile8.topleft,(15,20))
-                x=missile8.x
-                y=missile8.y
-                if shou(x,y)==1:
-                    e_missiles4.remove(missile8)
-                elif player.colliderect(rect):
-                    player_hp -= 1
-                    e_missiles4.remove(missile8)
-                    if player_hp ==0:
-                        status=23
+            player_hp, status = shooting_survival_p_missiles_update(e_missiles4, 10, 0, player_hp, status)
+            
     #bound
     elif status == 27:
+            
         
         if turn1 :
             boal.x += 10
@@ -895,51 +850,26 @@ def update():
             if pack2.y < HEIGHT-80:
                 pack2.y += 5
                 py=pack2.y
+                
     elif status ==38:
         if keyboard.SPACE:
             status=39
     
 
     elif status ==39:
-        def atari():
-            global boalgi,status
-            if boalgi.x>0:
-                if boalgi.y<60 or boalgi.y>540:
-                 status=40
-            if boalgi.x>60:
-                if boalgi.y<100 or boalgi.y>500:
-                    status=40
-
-            if boalgi.x>140:
-                if boalgi.y<140 or boalgi.y>460:
-                     status=40
-
-            if boalgi.x>220:
-                if boalgi.y<180 or boalgi.y>420:
-                    status=40
-
-            if boalgi.x>300:
-                if boalgi.y<220 or boalgi.y>380:
-                    status=40
-
-            if boalgi.x>380:
-                if boalgi.y<260 or boalgi.y>340:
-                    status=40
-            if boalgi.x>780:
-                status=41
-
         boalgi.x +=1
         if Turn3 :
             boalgi.y -=5
-            atari()
+            status = atari(boalgi,status)
         else:
             boalgi.y += 5
-            atari()
+            status = atari(boalgi,status)
         
         if keyboard.UP:
             Turn3 = True
         if keyboard.DOWN:
             Turn3 = False
+            
     elif status ==40:
         if keyboard.SPACE:
             boalgi.center=(0,300)
