@@ -451,8 +451,23 @@ def shooting_survival_draw_missiles():
     
     
 #####　SHOORING SURVIVAL(UPDATE)　#################################################################
-def shooting_survival_update():
-    pass
+def shooting_survival_p_missiles_update(missiles,mx,my,enemy_hp,status):
+        for missile in p_missiles:
+            missile.x += mx
+            missile.y += my
+            rect = Rect(missile.topleft, (15, 20))
+            x = missile.x
+            y = missile.y
+            
+            if shou(x, y) == 1:
+                p_missiles.remove(missile)
+                
+            if enemy.colliderect(rect):
+                enemy_hp -= 1
+                p_missiles.remove(missile)
+                
+                if enemy_hp == 0:
+                    return status = 22
 #####　AIR HOCEKY(DRAW)　##########################################################################
 def air_hockey_draw(status):
     air_hockey_draw_stage()
@@ -702,6 +717,9 @@ def update():
                         and (y*40<b) 
                         and (b< y*40+40)):
                             return 1;
+
+
+            
         if a==1:
             for missile1 in p_missiles1:
                 missile1.y -=10
