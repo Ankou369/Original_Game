@@ -50,8 +50,37 @@ eshot = 60
 
 
 #MOON LANDER　宣言
-rocket =Actor('rocket',center=(400,300))
-                      
+#MOON LANDER ENEMY CLASS
+@dataclass 
+class moon_lander_setting_record:
+    stage:int
+    acceleration:float
+    speed:float
+
+moon_lander_table = [moon_lander_setting_record(1, -0.1, 1.0),
+                     moon_lander_setting_record(2, -0.2, 1.0),
+                     moon_lander_setting_record(3, -0.3, 1.5)]
+
+@dataclass
+class moon_lander_rocket_record:
+    actor:object
+    speed:float
+
+def create_rocket():
+    actor = Actor('rocket',center=(400,300))
+    actor.angle = 0
+        
+    return moon_lander_rocket_record(
+        actor = actor,
+        speed = 0
+        )
+
+rocket = create_rocket()
+
+anime_r=animate(None)
+
+
+
 moon_lander = Actor('rhome',center=(620,200))
 space_shooter = Actor('shome',center=(185,200))
 no_touch_game = Actor('ghome',center=(400,200))
@@ -60,10 +89,6 @@ air_hockey_1 = Actor('bhome1',center=(670,450))
 air_hockey_2 = Actor('bhome2',center=(570,450))
 air_hockey_3 = Actor('bhome3',center=(620,450))
 
-speed =0
-acceleration =0.1
-key_flg =False
-anime_r=animate(None)
 #SHOOTING SURVIVER 宣言
 p_missiles1 = []
 p_missiles2 = []
@@ -167,16 +192,6 @@ boxgi=Actor('box',topleft=(0,0))
 #ボール
 boalgi=Actor('boal',center=(0,300))
 
-#MOON LANDER ENEMY CLASS
-@dataclass 
-class moon_lander_enemy_record:
-    stage:int
-    acceleration:float
-    speed:float
-
-moon_lander_enemy_table = [moon_lander_enemy_record(1, -0.1, 1.0),
-                           moon_lander_enemy_record(2, -0.2, 1.0),
-                           moon_lander_enemy_record(3, -0.3, 1.5)]
 
 
 #####　ガイドテキスト　############################################################################
@@ -413,7 +428,7 @@ def moon_lander_draw(status):
         for i in range(50):
             screen.draw.line((350-i*3,550+i),(450+i*3,550+i),'GRAY')
         for i in range(10):
-            screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
+            screen.draw.circle(rocket.actor.midbottom,i+1,(255,i*20,0))
             screen.draw.text("Moon Lander",(250,100),owidth=1.5,ocolor ='YELLOW',color ='BLACK',fontsize=64)
         game_start_guide()
     else:
@@ -426,7 +441,7 @@ def moon_lander_play_draw(status):
         screen.draw.text(f'STAGE {now_stage}',(110,300),color ='YELLOW',fontsize =64)
         if key_flg:
             for i in range(10):
-                screen.draw.circle(rocket.midbottom,i+1,(255,i*20,0))
+                screen.draw.circle(rocket.actor.midbottom,i+1,(255,i*20,0))
 
     elif status == 12 or status == 15 or status == 18:
         if now_stage <= 2:
@@ -446,31 +461,31 @@ def moon_lander_draw_stage():
 
     for i in range(50):
         screen.draw.line((350-i*3,550+i),(450+i*3,550+i),'GRAY')
-    rocket.draw()
+    rocket.actor.draw()
     
     
         
 #####　MOON LANDER(UPDATE)　#######################################################################
-def moon_lander_update(speed,status):
+def moon_lander_update(rocket,status):
     global key_flg
     now_stage = ((status - 2) // 3) - 2
     if keyboard.up:
         key_flg = True
-        acceleration = table[now_stage - 1].acceleration
+        acceleration = moon_lander_table[now_stage - 1].acceleration
     else:
         key_flg = False
-        acceleration = -(table[now_stage - 1].acceleration)
-    speed += acceleration
-    rocket.y += speed
-    if rocket.y > 500:
-        if speed < table[now_stage - 1].speed:
+        acceleration = -(moon_lander_table[now_stage - 1].acceleration)
+    rocket.speed += acceleration
+    rocket.actor.y += rocket.speed
+    if rocket.actor.y > 500:
+        if rocket.speed < moon_lander_table[now_stage - 1].speed:
             status = 9  + (now_stage * 3) #STAGE1なら12,STAGE2なら15,STAGE3なら18
             
         else:
             status = 10 + (now_stage * 3) #STAGE1なら13,STAGE2なら16,STAGE3なら19
-            anime_r =animate(rocket, 'bounce_start_end',1,angle=45)
+            anime_r =animate(rocket.actor, 'bounce_start_end',1,angle=45)
 
-    return speed,status
+    return rocket,status
 #####　SHOOTING SURVIVAL(DRAW)　###################################################################
 def shooting_survival_draw(status):
     #SHOOTING SURVIVAL　オープニング
@@ -713,7 +728,8 @@ def atari(boalgi,status):
 
 #絵の描画
 def draw():
-    global status,e_ship,enemy,player,player_hp,enemy_hp,apoint,bpoint
+    global status,enemy,player,player_hp,enemy_hp,apoint,bpoint
+    global enemy_ship,shooter_ship
         
     if status < 31 or status == 33 or status >35 :
         screen.clear()
@@ -762,10 +778,10 @@ def draw():
 
 
 def update():
-    global turn,eshot,status,i,j,k,l,a,b,c,d,enemy_hp,player_hp
-    global speed,acceleration,key_flg,anime_r
+    global status,i,j,k,l,a,b,c,d,enemy_hp,player_hp
+    global speed,key_flg,anime_r,rocket
     global turn1,turn2,bx,by,px,py,status,apoint,bpoint,Turn3
-    global enemy_ship,shooter_ship
+    global enemy_ship,shooter_ship,turn,eshot
     
     for i in range(len(star)):
         star[i].y += i
@@ -780,7 +796,7 @@ def update():
 
     #MOON LANDER
     if status == 11 or status == 14 or status == 17:
-        speed,status = moon_lander_update(speed,status)
+        rocket,status = moon_lander_update(rocket,status)
 
     #MAZE
     elif status ==21:
@@ -910,10 +926,11 @@ def update():
 
 def on_key_down(key):
     global status
-    global speed,acceleration
+    global speed
     global a,b,c,d,o,j,k,l,player_hp,enemy_hp
     global location1,location2,player,enemy,p_missile,s_missile,apoint,bpoint
-    global shooter_ship,enemy_ship,init_ship_table
+    global shooter_ship,enemy_ship
+    global rocket
 
 #####　SPACE SHOOTER　##########################################################################
     #ゲーム選択
@@ -922,11 +939,6 @@ def on_key_down(key):
             shooter_ship = create_shooter()
             enemy_ship = create_enemy()
             status = 3
-
-    #ミサイル発射
-    if key == keys.SPACE:
-        if state ==4 or status == 7:
-            shooter_ship.missiles.append(Actor('smissile.png',shooter_ship.actor.pos))
 
     #ゲームスタート
     if key == keys.RETURN:
@@ -939,15 +951,53 @@ def on_key_down(key):
             enemy_ship = create_enemy()
             status = 7
 
+    #ミサイル発射
+    if key == keys.SPACE:
+        if status ==4 or status == 7:
+            shooter_ship.missiles.append(Actor('smissile.png',shooter_ship.actor.pos))
+
     #選択画面へ戻る
     if key == keys.P:
-        elif status ==3 or status == 5 or status ==6 or status == 8 or status == 9:
+        if status ==3 or status == 5 or status ==6 or status == 8 or status == 9:
             status =2
 
     
 
     
-################################################################################################
+#####　MOON LANDER　###########################################################################################
+    #ゲーム選択
+    if key == keys.B:
+        if status ==2:
+            rocket = create_rocket()
+            status = 10
+
+    #ゲームスタート
+    if key == keys.SPACE and anime_r.running != True:
+        #STAGE1
+        if status == 10 or status == 13:
+            rocket = create_rocket()
+            
+            status =11
+        #STAGE2    
+        elif status == 12 or status ==16:
+            rocket = create_rocket()
+            
+            status =14
+        #STAGE3    
+        elif status == 15 or status == 19:
+            rocket = create_rocket()
+
+            status =17
+
+    #選択画面へ戻る
+    if key == keys.P:
+        if 10 <= status <= 19:
+            status =2
+    
+    
+###################################################################################################
+
+
     if key == keys.SPACE:
         if status ==1:
             status = 2
@@ -999,58 +1049,10 @@ def on_key_down(key):
             boal.topleft=(400,300)
             status =27
     
-            
-    
-        
-    if key == keys.SPACE and anime_r.running != True:
-        #STAGE1
-        if status == 10 or status == 13:
-            
-            status =11
-            rocket.y=200
-            speed =0
-            acceleration =0.1
-            rocket.angle =0
-        #STAGE2    
-        elif status == 12 or status ==16:
-            status =14
-            rocket.y=200
-            speed =0
-            acceleration =0.1
-            rocket.angle =0
-        #STAGE3    
-        elif status == 15 or status == 19:
-            status =17
-            rocket.y=200
-            speed =0
-            acceleration =0.1
-            rocket.angle =0
-
     #戻る
     if key == keys.P:
         if status ==2:
             status =1
-        
-        elif status ==10:
-            status =2
-        elif status ==11:
-            status =2
-        elif status ==12:
-            status =2
-        elif status ==13:
-            status =2
-        elif status ==14:
-            status =2
-        elif status ==15:
-            status =2
-        elif status ==16:
-            status =2
-        elif status ==17:
-            status =2
-        elif status ==18:
-            status =2
-        elif status ==19:
-            status =2
         elif status == 20:
             status =2
         elif status ==21:
@@ -1101,10 +1103,7 @@ def on_key_down(key):
                 if map_data[location1[0]][location1[1]-1] != 1:
                     location1[1] -= 1
                     player.x -=40
-    #MOON LANDER　オープニングへ
-    if key == keys.B:
-        if status ==2:
-            status = 10
+    
     if key ==keys.W:
         if status == 21:
             #プレイヤーが上端でなければ
