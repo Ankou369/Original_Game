@@ -17,15 +17,38 @@ star = []
 for i in range(30):
     rect =Rect((random.randrange(WIDTH),random.randrange(HEIGHT)),(2,2))
     star .append(rect)
+    
 #SPACE SHOOTER　宣言
-shooter = Actor('shooter.png',(400,500))
-eship =Actor('eship.png',(400,100))
-shooter_hp =10
-eship_hp =30
-s_missiles = []
+@dataclass
+class space_shooter_enemy_record:
+    actor: object
+    hp: int
+    missiles:list
+
+def create_shooter():
+    return space_shooter_enemy_record(
+    actor=Actor('shooter.png',(400,500)),
+    hp=10,
+    missiles=[]
+)
+shooter_ship = create_shooter()
+
+def create_enemy():
+    return space_shooter_enemy_record(
+    actor=Actor('eship.png',(400,100)),
+    hp=1,
+    missiles=[]
+)
+enemy_ship = create_enemy()
+
+ship_table = [shooter_ship, enemy_ship]
+
 turn =False
 eshot = 60
-e_missiles =[]
+
+
+
+
 #MOON LANDER　宣言
 rocket =Actor('rocket',center=(400,300))
                       
@@ -151,9 +174,10 @@ class moon_lander_enemy_record:
     acceleration:float
     speed:float
 
-table = [moon_lander_enemy_record(1, -0.1, 1.0),
-         moon_lander_enemy_record(2, -0.2, 1.0),
-         moon_lander_enemy_record(3, -0.3, 1.5)]
+moon_lander_enemy_table = [moon_lander_enemy_record(1, -0.1, 1.0),
+                           moon_lander_enemy_record(2, -0.2, 1.0),
+                           moon_lander_enemy_record(3, -0.3, 1.5)]
+
 
 #####　ガイドテキスト　############################################################################
 def game_start_guide():
@@ -235,24 +259,24 @@ def menu():
     
     
 #####　SPACE SHOOTER(DRAW)　#######################################################################
-def space_shooter_draw(status,eship,player):
+def space_shooter_draw(status,enemy_ship,shooter_ship):
     #SPACE SHOOTER オープニング
     if status == 3:
         screen.draw.text('S P A C E  S H O O T E R',(120,290),color='WHITE',gcolor = 'YELLOW',fontsize =72)
         game_start_guide()
 
-        shooter.draw()
-        eship.draw()
+        shooter_ship.actor.draw()
+        enemy_ship.actor.draw()
 
     else:
-        space_shooter_battle_draw(status)
+        space_shooter_battle_draw(status,enemy_ship, shooter_ship)
     
 
                 
-def space_shooter_battle_draw(status):
+def space_shooter_battle_draw(status,enemy_ship, shooter_ship):
     #SPACE SHOOTER HPの描写
-    space_shooter_hp = [(f'Enemy HP = {eship_hp}'    ,(50 ,50)),
-                        (f'Shooter HP = {shooter_hp}',(600,50))]
+    space_shooter_hp = [(f'Enemy HP = {enemy_ship.hp}'    ,(50 ,50)),
+                        (f'Shooter HP = {shooter_ship.hp}',(600,50))]
     
     now_stage = (status-1) // 3 # 4,5ならSTAGE１,７,8ならSTAGE2
     #SPACE SHOOTER STAGE1
@@ -260,19 +284,20 @@ def space_shooter_battle_draw(status):
         screen.draw.text(f'STAGE {now_stage}',(300,300),color ='YELLOW',fontsize =64)
 
         #ミサイルの描写
-        for missile in s_missiles:
+        for missile in shooter_ship.missiles:
             missile.draw()
-        for missile in e_missiles:
+        for missile in enemy_ship.missiles:
             missile.draw()
         #HPの描写
         for text,pos in space_shooter_hp:
             screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
 
-        shooter.draw()
-        eship.draw()
+        shooter_ship.actor.draw()
+        enemy_ship.actor.draw()
     elif status == 5 or status ==8:
         screen.draw.text('G A M E  C L E A R',(310,290),color ='WHITE',gcolor ='YELLOW',fontsize=32)
-        shooter.draw()
+        shooter_ship.actor.draw()
+        
         if now_stage == 1:
             game_middle_guide()
         else:
@@ -281,8 +306,10 @@ def space_shooter_battle_draw(status):
 
     elif status == 6 or status == 9:
         screen.draw.text('G A M E  O V E R',(310,290),color ='WHITE',gcolor ='RED',fontsize=32)
+        enemy_ship.actor.draw()
+        
         game_over_guide()
-        eship.draw()
+        
 
 
     
@@ -291,90 +318,90 @@ def space_shooter_battle_draw(status):
     
     
 #####　SPACE SHOOTER(UPDATE)　#####################################################################
-def space_shooter_update(status,eship,e_missiles,s_missiles,shooter_hp,eship_hp,eshot):
+def space_shooter_update(status,enemy_ship, shooter_ship,eshot):
     #自機のキー操作
-    space_shooter_move_shooter()
+    space_shooter_move_shooter(shooter_ship)
     
     #敵を左右に動かす
-    space_shooter_move_enemy(status)       
+    space_shooter_move_enemy(status,enemy_ship)       
 
 
     #敵のミサイルの角度        
     if eshot ==0:
-        space_shooter_enemy_missile_angle(eship)
+        space_shooter_enemy_missile_angle(enemy_ship,shooter_ship)
         eshot = 60 #時間をリセット 
     else:
         eshot -=1
         
 
     #敵のミサイル
-    status,shooter_hp = space_shooter_enemy_missile(status,e_missiles,shooter_hp)
+    status,shooter_ship = space_shooter_enemy_missile(status,enemy_ship, shooter_ship)
         
 
     #自機のミサイル
-    status,eship_hp = space_shooter_shooter_missile(status,s_missiles,eship_hp)
+    status,enemy_ship = space_shooter_shooter_missile(status,enemy_ship, shooter_ship)
 
-    return status,shooter_hp,eship_hp,eshot
+    return status,enemy_ship,shooter_ship,eshot
 
 
 #自機のキー操作
-def space_shooter_move_shooter():
+def space_shooter_move_shooter(shooter_ship):
     if keyboard.left:
-        if shooter.x>47:
-            shooter.x -= 3
+        if shooter_ship.actor.x>47:
+            shooter_ship.actor.x -= 3
     if keyboard.right:
-        if shooter.x < WIDTH-47:
-            shooter.x += 3
+        if shooter_ship.actor.x < WIDTH-47:
+            shooter_ship.actor.x += 3
 
-def space_shooter_enemy_missile_angle(eship):
-    angle = eship.angle_to(shooter)
-    missile1 = Actor('emissile.png',(eship.x-25,eship.y+10))
-    missile2 = Actor('emissile.png',(eship.x+25,eship.y+10))
+def space_shooter_enemy_missile_angle(enemy_ship,shooter_ship):
+    angle = enemy_ship.actor.angle_to(shooter_ship.actor)
+    missile1 = Actor('emissile.png',(enemy_ship.actor.x-25,enemy_ship.actor.y+10))
+    missile2 = Actor('emissile.png',(enemy_ship.actor.x+25,enemy_ship.actor.y+10))
     missile1.angle =90 +angle
     missile2.angle =90 +angle
-    e_missiles.append(missile1)
-    e_missiles.append(missile2)
+    enemy_ship.missiles.append(missile1)
+    enemy_ship.missiles.append(missile2)
 
 #敵を左右に動かす
-def space_shooter_move_enemy(status):
+def space_shooter_move_enemy(status,enemy_ship):
     global turn
     width_adjust = 80
     
     if turn :
-        eship.x += 5 * (status // 3) # 4ならSTAGE１,７ならSTAGE2
-        if eship.x + width_adjust > WIDTH:
+        enemy_ship.actor.x += 5 * (status // 3) # 4ならSTAGE１,７ならSTAGE2
+        if enemy_ship.actor.x + width_adjust > WIDTH:
             turn = False
     else:
-        eship.x -= 5 * (status // 3) # 4ならSTAGE１,７ならSTAGE2
-        if eship.x - width_adjust < 0:
+        enemy_ship.actor.x -= 5 * (status // 3) # 4ならSTAGE１,７ならSTAGE2
+        if enemy_ship.actor.x - width_adjust < 0:
             turn = True
 #敵のミサイル
-def space_shooter_enemy_missile(status,e_missiles,shooter_hp):
+def space_shooter_enemy_missile(status,enemy_ship, shooter_ship):
     now_stage = (status - 1) // 3
-    for missile in e_missiles:
+    for missile in enemy_ship.missiles:
         red =math.radians(-(missile.angle-90))
         missile.x += (math.cos(red)) * 3
         missile.y += (math.sin(red)) * 3
         rect =Rect(missile.topleft,(11,35))
-        if shooter.colliderect(rect):
-            shooter_hp -= 1
-            if shooter_hp ==0:
+        if shooter_ship.actor.colliderect(rect):
+            shooter_ship.hp -= 1
+            if shooter_ship.hp ==0:
                 status= 3 + (3 * now_stage)
-            e_missiles.remove(missile)
-    return status,shooter_hp
+            enemy_ship.missiles.remove(missile)
+    return status,shooter_ship
 
 #自機のミサイル
-def space_shooter_shooter_missile(status,s_missiles,eship_hp):
+def space_shooter_shooter_missile(status,enemy_ship, shooter_ship):
     now_stage = (status - 1) // 3
-    for missile in s_missiles:
+    for missile in shooter_ship.missiles:
         missile.y -=10
         rect =Rect(missile.topleft,(16,22))
-        if eship.colliderect(rect):
-            eship_hp -= 1
-            if eship_hp ==0:
+        if enemy_ship.actor.colliderect(rect):
+            enemy_ship.hp -= 1
+            if enemy_ship.hp ==0:
                 status = 2 + (3 * now_stage)
-            s_missiles.remove(missile)
-    return status,eship_hp
+            shooter_ship.missiles.remove(missile)
+    return status,enemy_ship
 #####　MOON LANDER(DRAW)　#########################################################################
 def moon_lander_draw(status):
     #MOON LANDER　オープニング
@@ -463,6 +490,7 @@ def shooting_survival_draw(status):
         
         #終わりのガイド
         game_end_guide()
+
 
     #結果
     elif status == 22 or status == 23:
@@ -685,7 +713,7 @@ def atari(boalgi,status):
 
 #絵の描画
 def draw():
-    global status,eship,enemy,player,player_hp,enemy_hp,apoint,bpoint
+    global status,e_ship,enemy,player,player_hp,enemy_hp,apoint,bpoint
         
     if status < 31 or status == 33 or status >35 :
         screen.clear()
@@ -707,7 +735,7 @@ def draw():
         
     #SPACE SHOOTER
     elif 3 <= status <= 9 :
-        space_shooter_draw(status,eship,shooter)
+        space_shooter_draw(status,enemy_ship,shooter_ship)
         
 
     #MOON LANDER　
@@ -734,18 +762,20 @@ def draw():
 
 
 def update():
-    global eship_hp,turn,eshot,shooter_hp,status,i,j,k,l,a,b,c,d,enemy_hp,player_hp
+    global turn,eshot,status,i,j,k,l,a,b,c,d,enemy_hp,player_hp
     global speed,acceleration,key_flg,anime_r
     global turn1,turn2,bx,by,px,py,status,apoint,bpoint,Turn3
+    global enemy_ship,shooter_ship
     
     for i in range(len(star)):
         star[i].y += i
         if star[i].y > HEIGHT:
             star[i].y =0
-        
-    #SPACE SHOOTER 
+
+
+    #SPACE SHOOTER
     if status ==4 or status == 7:
-        status,shooter_hp,eship_hp,eshot = space_shooter_update(status,eship,e_missiles,s_missiles,shooter_hp,eship_hp,eshot)
+        status,enemy_ship,shooter_ship,eshot = space_shooter_update(status,enemy_ship,shooter_ship,eshot)
         
 
     #MOON LANDER
@@ -879,26 +909,59 @@ def update():
     
 
 def on_key_down(key):
-    global status,s_missiles,e_missiles,status,eship_hp,shooter_hp
+    global status
     global speed,acceleration
     global a,b,c,d,o,j,k,l,player_hp,enemy_hp
-    global location1,location2,player,enemy,p_missile,s_missile,shooter,eship,apoint,bpoint
+    global location1,location2,player,enemy,p_missile,s_missile,apoint,bpoint
+    global shooter_ship,enemy_ship,init_ship_table
+
+#####　SPACE SHOOTER　##########################################################################
+    #ゲーム選択
+    if key == keys.A:
+        if status ==2:
+            shooter_ship = create_shooter()
+            enemy_ship = create_enemy()
+            status = 3
+
+    #ミサイル発射
+    if key == keys.SPACE:
+        if state ==4 or status == 7:
+            shooter_ship.missiles.append(Actor('smissile.png',shooter_ship.actor.pos))
+
+    #ゲームスタート
+    if key == keys.RETURN:
+        if status == 3 or status == 6:
+            shooter_ship = create_shooter()
+            enemy_ship = create_enemy()
+            status = 4
+        elif status == 5 or status == 9:
+            shooter_ship = create_shooter()
+            enemy_ship = create_enemy()
+            status = 7
+
+    #選択画面へ戻る
+    if key == keys.P:
+        elif status ==3 or status == 5 or status ==6 or status == 8 or status == 9:
+            status =2
+
     
+
+    
+################################################################################################
     if key == keys.SPACE:
         if status ==1:
             status = 2
         
-        elif status == 4 or status ==7 :
-            s_missiles.append(Actor('smissile.png',shooter.pos))
         elif status ==20:
             player_hp=10
             enemy_hp=10
             s_missiles=[]
             e_missiles=[]
-            location1 =[0,1]
-            location2 =[13,18]
             player=Actor('player',topleft=(40,0))
             enemy=Actor('enemy',topleft=(720,520))
+            
+            location1 =[0,1]
+            location2 =[13,18]
             status =21
         elif status ==22:
             player_hp=10
@@ -935,19 +998,6 @@ def on_key_down(key):
             turn2 =True
             boal.topleft=(400,300)
             status =27
-    if key == keys.RETURN:
-        if status == 3 or status == 6:
-                eship_hp =30
-                shooter_hp=10
-                s_missiles=[]
-                e_missiles=[]
-                status = 4
-        elif status == 5 or status == 9:
-                eship_hp =1
-                shooter_hp=10
-                s_missiles=[]
-                e_missiles=[]
-                status = 7
     
             
     
@@ -980,26 +1030,7 @@ def on_key_down(key):
     if key == keys.P:
         if status ==2:
             status =1
-        elif status ==3:
-            shooter = Actor('shooter.png',(400,500))
-            eship =Actor('eship.png',(400,100))
-            status =2
-        elif status ==5:
-            shooter = Actor('shooter.png',(400,500))
-            eship =Actor('eship.png',(400,100))
-            status =2
-        elif status ==6:
-            shooter = Actor('shooter.png',(400,500))
-            eship =Actor('eship.png',(400,100))
-            status =2
-        elif status ==8:
-            shooter = Actor('shooter.png',(400,500))
-            eship =Actor('eship.png',(400,100))
-            status =2
-        elif status ==9:
-            shooter = Actor('shooter.png',(400,500))
-            eship =Actor('eship.png',(400,100))
-            status =2
+        
         elif status ==10:
             status =2
         elif status ==11:
@@ -1062,10 +1093,8 @@ def on_key_down(key):
             boalgi.center=(0,300)
             status=38    
             
-    #SPACE SHOOTER オープニングへ
     if key == keys.A:
-        if status ==2:
-            status = 3
+            
         if status == 21:
             #プレイヤーが端でなければ
             if location1[1] >= 1:
