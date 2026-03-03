@@ -17,6 +17,14 @@ star = []
 for i in range(30):
     rect =Rect((random.randrange(WIDTH),random.randrange(HEIGHT)),(2,2))
     star .append(rect)
+
+moon_lander = Actor('rhome',center=(620,200))
+space_shooter = Actor('shome',center=(185,200))
+no_touch_game = Actor('ghome',center=(400,200))
+shooting_surival = Actor('hhome',center=(185,450))
+air_hockey_1 = Actor('bhome1',center=(670,450))
+air_hockey_2 = Actor('bhome2',center=(570,450))
+air_hockey_3 = Actor('bhome3',center=(620,450))
     
 #SPACE SHOOTER　宣言
 @dataclass
@@ -49,8 +57,9 @@ eshot = 60
 
 
 
+
+
 #MOON LANDER　宣言
-#MOON LANDER ENEMY CLASS
 @dataclass 
 class moon_lander_setting_record:
     stage:int
@@ -79,34 +88,7 @@ rocket = create_rocket()
 
 anime_r=animate(None)
 
-
-
-moon_lander = Actor('rhome',center=(620,200))
-space_shooter = Actor('shome',center=(185,200))
-no_touch_game = Actor('ghome',center=(400,200))
-shooting_surival = Actor('hhome',center=(185,450))
-air_hockey_1 = Actor('bhome1',center=(670,450))
-air_hockey_2 = Actor('bhome2',center=(570,450))
-air_hockey_3 = Actor('bhome3',center=(620,450))
-
 #SHOOTING SURVIVER 宣言
-p_missiles1 = []
-p_missiles2 = []
-p_missiles3 = []
-p_missiles4 = []
-e_missiles1 = []
-e_missiles2 = []
-e_missiles3 = []
-e_missiles4 = []
-a=0
-b=0
-c=0
-d=0
-o=0
-j=0
-k=0
-l=0
-#map
 map_data=[[1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
           [1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,1,0,0,0,0],
           [1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0],
@@ -122,6 +104,28 @@ map_data=[[1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
           [0,1,1,1,0,1,0,0,0,1,0,1,1,0,0,1,0,0,1,1],
           [0,0,0,0,0,1,0,1,0,0,0,1,1,0,0,0,0,0,0,1],
           [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
+
+@dataclass
+class shooting_survival_record:
+        actor:str
+        actor_direction:bool
+        missiles:list
+        missiles_x:int
+        missiles_y:int
+
+        
+shooting_survival_missiles_table = [shooting_survival_record("player",0,[],   0, -10),
+                                    shooting_survival_record("player",0,[],   0,  10),
+                                    shooting_survival_record("player",0,[], -10,   0),
+                                    shooting_survival_record("player",0,[],  10,   0),
+                                    shooting_survival_record("enemy" ,0,[],   0, -10),
+                                    shooting_survival_record("enemy" ,0,[],   0,  10),
+                                    shooting_survival_record("enemy" ,0,[], -10,   0),
+                                    shooting_survival_record("enemy" ,0,[],  10,   0)]
+
+
+
+
 hock_data=[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
           [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
           [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -487,7 +491,7 @@ def moon_lander_update(rocket,status):
 
     return rocket,status
 #####　SHOOTING SURVIVAL(DRAW)　###################################################################
-def shooting_survival_draw(status):
+def shooting_survival_draw(status,space_shooter_missiles_table):
     #SHOOTING SURVIVAL　オープニング
     if status ==20:
         shooting_survival_draw_stage()
@@ -500,8 +504,9 @@ def shooting_survival_draw(status):
         shooting_survival_draw_stage()
         #HP の描写
         shooting_survival_draw_hp()
+        
         #ミサイルの描写
-        shooting_survival_draw_missiles()
+        shooting_survival_draw_missiles(space_shooter_missiles_table)
         
         #終わりのガイド
         game_end_guide()
@@ -536,17 +541,9 @@ def shooting_survival_draw_hp():
     for text,pos in shooting_survival_hp:
         screen.draw.text(text,pos,color='YELLOW',fontsize = 32)
 
-def shooting_survival_draw_missiles():
-    shooting_survival_missiles = [p_missiles1,
-                                  p_missiles2,
-                                  p_missiles3,
-                                  p_missiles4,
-                                  e_missiles1,
-                                  e_missiles2,
-                                  e_missiles3,
-                                  e_missiles4]
-    for missiles_list in shooting_survival_missiles:
-        for missile in missiles_list:
+def shooting_survival_draw_missiles(table):
+    for record in table:
+        for missile in record.missiles:
             missile.draw()
     
     
@@ -565,46 +562,37 @@ def shou(a,b):
                 and (b< y*40+40)):
                     return 1
 #playerのミサイル
-def shooting_survival_p_missiles_update(p_missiles,mx,my,enemy_hp,status):
-    for missile in p_missiles:
-        missile.x += mx
-        missile.y += my
+def shooting_survival_missiles_update(record,enemy_hp,player_hp,status):
+    for missile in record.missiles:
+        missile.x += record.missiles_x
+        missile.y += record.missiles_y
         rect = Rect(missile.topleft, (15, 20))
         x = missile.x
         y = missile.y
         
         if shou(x, y) == 1:
-            p_missiles.remove(missile)
-            
-        if enemy.colliderect(rect):
-            enemy_hp -= 1
-            p_missiles.remove(missile)
-            
-            if enemy_hp == 0:
-                status = 22
-                
-    return  enemy_hp,status
+            record.missiles.remove(missile)
 
-#enemyのミサイル
-def shooting_survival_e_missiles_update(e_missiles,mx,my,player_hp,status):
-    for missile in p_missiles:
-        missile.x += mx
-        missile.y += my
-        rect = Rect(missile.topleft, (15, 20))
-        x = missile.x
-        y = missile.y
-        
-        if shou(x, y) == 1:
-            e_missiles.remove(missile)
+        if record.actor == "player":
             
-        if player.colliderect(rect):
-            player_hp -= 1
-            e_missiles.remove(missile)
-            
-            if player_hp == 0:
-                status = 23
+            if enemy.colliderect(rect):
+                enemy_hp -= 1
+                record.missiles.remove(missile)
                 
-    return  player_hp,status
+                if enemy_hp == 0:
+                    status = 22
+            
+        else:
+            if player.colliderect(rect):
+                player_hp -= 1
+                record.missiles.remove(missile)
+                
+                if player_hp == 0:
+                    status = 23
+            
+                
+    return  enemy_hp,player_hp,status
+
 #####　AIR HOCEKY(DRAW)　##########################################################################
 def air_hockey_draw(status):
     air_hockey_draw_stage()
@@ -761,7 +749,7 @@ def draw():
 
     #SHOOTING SURVIVAL
     elif 20 <= status <=23:
-        shooting_survival_draw(status)
+        shooting_survival_draw(status,space_shooter_missiles_table)
         
     
 
@@ -800,30 +788,12 @@ def update():
 
     #MAZE
     elif status ==21:
-        if a==1:
-            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles1, 0, -10, enemy_hp, status)
 
-        if b==1:
-            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles2, 0, 10, enemy_hp, status)
-    
-        if c==1:
-            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles3, -10, 0, enemy_hp, status)
-            
-        if d==1:
-            enemy_hp, status = shooting_survival_p_missiles_update(p_missiles4, 10, 0, enemy_hp, status)
-
-        if o==1:
-            player_hp, status = shooting_survival_p_missiles_update(e_missiles1, 0, -10, player_hp, status)
-            
-        if j==1:
-            player_hp, status = shooting_survival_p_missiles_update(e_missiles2, 0, 10, player_hp, status)
-            
-        if k==1:
-            player_hp, status = shooting_survival_p_missiles_update(e_missiles3, -10, 0, player_hp, status)
-            
-        if l==1:
-            player_hp, status = shooting_survival_p_missiles_update(e_missiles4, 10, 0, player_hp, status)
-            
+        for record in space_shooter_missiles_table:
+            if record.actor_direction == 1:
+                enemy_hp, player_hp, status = shooting_survival_missiles_update(
+                    record, enemy_hp, player_hp, status
+                )
     #bound
     elif status == 27:
             
@@ -1144,18 +1114,20 @@ def on_key_down(key):
                     location1[1] += 1
                     player.x +=40
     if key == keys.T:
-        p_missiles1.append(Actor('pmissile1.png',player.pos))
-        a=1
+        space_shooter_missiles_table[0].missiles.append(Actor('pmissile1.png',player.pos))
+        space_shooter_missiles_table[0].actor_direction = 1
 
     if key == keys.G:
-        p_missiles2.append(Actor('pmissile2.png',player.pos))
-        b=1
+        space_shooter_missiles_table[1].missiles.append(Actor('pmissile2.png',player.pos))
+        space_shooter_missiles_table[1].actor_direction = 1
+        
     if key == keys.F:
-        p_missiles3.append(Actor('pmissile3.png',player.pos))
-        c=1
+        space_shooter_missiles_table[2].missiles.append(Actor('pmissile3.png',player.pos))
+        space_shooter_missiles_table[2].actor_direction = 1
+        
     if key == keys.H:
-        p_missiles4.append(Actor('pmissile4.png',player.pos))
-        d=1
+        space_shooter_missiles_table[3].missiles.append(Actor('pmissile4.png',player.pos))
+        space_shooter_missiles_table[3].actor_direction = 1
     
     if key ==keys.UP:
         #プレイヤーが上端でなければ
@@ -1190,30 +1162,19 @@ def on_key_down(key):
                     location2[1] += 1
                     enemy.x +=40
     if key == keys.KP5:
-        e_missiles1.append(Actor('emissile1.png',enemy.pos))
-        o=1
+        space_shooter_missiles_table[4].missiles.append(Actor('emissile1.png',enemy.pos))
+        space_shooter_missiles_table[4].actor_direction = 1
 
     if key == keys.KP2:
-        e_missiles2.append(Actor('emissile2.png',enemy.pos))
-        j=1
+        space_shooter_missiles_table[5].missiles.append(Actor('emissile2.png',enemy.pos))
+        space_shooter_missiles_table[5].actor_direction = 1
+        
     if key == keys.KP1:
-        e_missiles3.append(Actor('emissile3.png',enemy.pos))
-        k=1
+        space_shooter_missiles_table[6].missiles.append(Actor('emissile3.png',enemy.pos))
+        space_shooter_missiles_table[6].actor_direction = 1
+        
     if key == keys.KP3:
-        e_missiles4.append(Actor('emissile4.png',enemy.pos))
-        l=1                              
-    
-        
-            
-            
-            
-        
-
-
-
-
-
-
-                    
+        space_shooter_missiles_table[7].missiles.append(Actor('emissile4.png',enemy.pos))
+        space_shooter_missiles_table[7].actor_direction = 1                                 
 
 pgzrun.go()
