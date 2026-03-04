@@ -9,22 +9,22 @@ HEIGHT = 600
 
 status = 1
 
-turn1 =False
-turn2 =False
-Turn3=False
+turn1 = False
+turn2 = False
+Turn3 = False
 #星
 star = []
 for i in range(30):
-    rect =Rect((random.randrange(WIDTH),random.randrange(HEIGHT)),(2,2))
-    star .append(rect)
+    rect = Rect((random.randrange(WIDTH), random.randrange(HEIGHT)), (2, 2))
+    star.append(rect)
 
-moon_lander = Actor('rhome',center=(620,200))
-space_shooter = Actor('shome',center=(185,200))
-no_touch_game = Actor('ghome',center=(400,200))
-shooting_surival = Actor('hhome',center=(185,450))
-air_hockey_1 = Actor('bhome1',center=(670,450))
-air_hockey_2 = Actor('bhome2',center=(570,450))
-air_hockey_3 = Actor('bhome3',center=(620,450))
+moon_lander = Actor('rhome', center = (620, 200))
+space_shooter = Actor('shome', center=(185, 200))
+no_touch_game = Actor('ghome', center=(400, 200))
+shooting_surival = Actor('hhome', center=(185, 450))
+air_hockey_1 = Actor('bhome1', center=(670, 450))
+air_hockey_2 = Actor('bhome2', center=(570, 450))
+air_hockey_3 = Actor('bhome3', center=(620, 450))
     
 #SPACE SHOOTER　宣言
 @dataclass
@@ -185,8 +185,6 @@ pack2=Actor('pack2',topleft=(640,300))
 goal=Actor('goal',topleft=(0,0))
 apoint =0
 bpoint=0
-#出口の看板
-#exit =Actor('exit',topleft=(700,490))
 #キーボード
 #gizagizaの宣言
 #床のタイル
@@ -491,7 +489,7 @@ def moon_lander_update(rocket,status):
 
     return rocket,status
 #####　SHOOTING SURVIVAL(DRAW)　###################################################################
-def shooting_survival_draw(status,space_shooter_missiles_table):
+def shooting_survival_draw(status,shooting_survival_missiles_table):
     #SHOOTING SURVIVAL　オープニング
     if status ==20:
         shooting_survival_draw_stage()
@@ -506,7 +504,7 @@ def shooting_survival_draw(status,space_shooter_missiles_table):
         shooting_survival_draw_hp()
         
         #ミサイルの描写
-        shooting_survival_draw_missiles(space_shooter_missiles_table)
+        shooting_survival_draw_missiles(shooting_survival_missiles_table)
         
         #終わりのガイド
         game_end_guide()
@@ -749,7 +747,7 @@ def draw():
 
     #SHOOTING SURVIVAL
     elif 20 <= status <=23:
-        shooting_survival_draw(status,space_shooter_missiles_table)
+        shooting_survival_draw(status,shooting_survival_missiles_table)
         
     
 
@@ -789,7 +787,7 @@ def update():
     #MAZE
     elif status ==21:
 
-        for record in space_shooter_missiles_table:
+        for record in shooting_survival_missiles_table:
             if record.actor_direction == 1:
                 enemy_hp, player_hp, status = shooting_survival_missiles_update(
                     record, enemy_hp, player_hp, status
