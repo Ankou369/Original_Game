@@ -10,14 +10,14 @@ class EnemyRecord:
 
 def create_shooter():
     return EnemyRecord(
-    actor=Actor('shooter.png',(400,500)),
-    hp=10,
-    missiles=[]
+    actor = Actor('shooter.png', (400, 500)),
+    hp = 10,
+    missiles = []
 )
 
 def create_enemy():
     return EnemyRecord(
-    actor=Actor('eship.png',(400,100)),
-    hp=1,
-    missiles=[]
+    actor = Actor('eship.png', (400, 100)),
+    hp = 1,
+    missiles = []
 )
