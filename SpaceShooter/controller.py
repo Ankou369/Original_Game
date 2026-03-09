@@ -1,9 +1,9 @@
 from pgzero.actor import Actor
+from pgzero.builtins import keys
 from .models import create_shooter, create_enemy
 from .draw import opening_draw, battle_draw, game_clear_draw, game_over_draw
 from .draw import game_start_guide, game_middle_guide, game_end_guide, game_over_guide
 from .logic import move_shooter, move_enemy, enemy_missile_angle, enemy_missile, shooter_missile
-
 
 
 class SpaceShooter:
@@ -14,7 +14,12 @@ class SpaceShooter:
         self.shooter = create_shooter()
         self.enemy = create_enemy()
 
-
+    def reset(self):
+        self.status = 1
+        self.turn = False
+        self.eshot = 60
+        self.shooter = create_shooter()
+        self.enemy = create_enemy()
 
     def space_shooter_update(self, keyboard, WIDTH):
         #自機のキー操作
@@ -65,7 +70,7 @@ class SpaceShooter:
     def on_key_down(self, key):
         
         #ゲームスタート
-        if key == key.RETURN:
+        if key == keys.RETURN:
             if self.status == 1 or self.status == 4:
                 self.shooter = create_shooter()
                 self.enemy = create_enemy()
@@ -76,6 +81,6 @@ class SpaceShooter:
                 self.status = 5
 
         #ミサイル発射
-        if key == key.SPACE:
+        if key == keys.SPACE:
             if self.status ==2 or self.status == 5:
                 self.shooter.missiles.append(Actor('smissile.png', self.shooter.actor.pos))
